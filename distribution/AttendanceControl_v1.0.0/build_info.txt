@@ -1,12 +1,12 @@
 Product: Attendance Control
 Version: 1.0.0
-Built:   2026-09-06 16:32:04
+Built:   2026-09-06 16:36:19
 Python:  3.14.0
 Copyright: Copyright (c) 2026 Csepregi Artur. All rights reserved.
 Contact: https://csepregiartur.github.io
 
 Executable: AttendanceControl.exe
-SHA256: 15908b084484364142220b29d8be3abe1322c7938d0d47a2d8734480bd8ee816
+SHA256: 4eb096e5df0f34555716f47f176ebdaa5ee32f8fac6d01f688f547173cbea6c3
 Digital signature: Signed (self-signed, see below)
 Verify: right-click the EXE -> Properties -> Digital Signatures.
 

@@ -287,6 +287,99 @@ def copy_release_docs(exe_path: Path) -> None:
             log(f"Missing source document: {source}", "WARNING")
 
 
+TRUST_PS1 = r'''param(
+    [string]$CertPath = (Join-Path $PSScriptRoot 'AttendanceControl_codesigning.cer'),
+    [switch]$CurrentUserOnly
+)
+# Installs the Attendance Control code-signing certificate as trusted so the
+# signed EXE shows its real publisher (no "Unknown publisher") on this PC.
+$ErrorActionPreference = 'Stop'
+if (-not (Test-Path $CertPath)) { Write-Host "Certificate not found: $CertPath"; exit 1 }
+$cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($CertPath)
+$storeLocation = if ($CurrentUserOnly) { 'CurrentUser' } else { 'LocalMachine' }
+try {
+    $store = New-Object System.Security.Cryptography.X509Certificates.X509Store('Root', $storeLocation)
+    $store.Open('ReadWrite')
+    $present = $store.Certificates | Where-Object { $_.Thumbprint -eq $cert.Thumbprint }
+    if ($present) { Write-Host "[OK] Already trusted: $($cert.Subject)" }
+    else {
+        $store.Add($cert)
+        Write-Host "[OK] Trusted on this machine: $($cert.Subject)"
+    }
+    $store.Close()
+    $exe = Join-Path $PSScriptRoot '..\AttendanceControl.exe'
+    if (Test-Path $exe) {
+        $sig = Get-AuthenticodeSignature $exe
+        Write-Host "Signature on AttendanceControl.exe: $($sig.Status)  ($($sig.SignerCertificate.Subject))"
+    }
+}
+catch {
+    Write-Host "[ERR] $($_.Exception.Message)"
+    Write-Host "Tip: run as Administrator to trust for all users, or use -CurrentUserOnly for just this user."
+    exit 1
+}
+'''
+
+INSTALL_TXT = """Attendance Control - code signing trust (free, internal deployment)
+====================================================================
+
+The AttendanceControl.exe is signed with a certificate issued by you
+(Csepregi Artur). Because the certificate is self-signed, other Windows PCs do
+not trust it yet and may show "Unknown publisher".
+
+Fix it once per PC (free, no public CA needed):
+  1. Copy this 'certificates' folder (or the whole distribution) to the PC.
+  2. Run as Administrator (trusts the certificate for all users on that PC):
+
+       powershell -ExecutionPolicy Bypass -File trust_certificate.ps1
+
+     or for just the current user (no admin needed):
+
+       powershell -ExecutionPolicy Bypass -File trust_certificate.ps1 -CurrentUserOnly
+
+After that, right-click AttendanceControl.exe > Properties > Digital Signatures
+shows: "The digital signature is OK" and the publisher = Attendance Control -
+Csepregi Artur. No more "Unknown publisher".
+
+For fleets/domains: instead of running the script by hand, push the .cer into
+"Trusted Root Certification Authorities" via Group Policy (Computer
+Configuration > Windows Settings > Security Settings > Public Key Policies),
+or with a one-line software-deployment command. That does the same thing.
+
+Note: this trusts YOUR certificate only on PCs you control. It is not the same
+as a commercial CA signature recognised by every Windows PC on the internet
+(those certificates are paid).
+"""
+
+
+def publish_certificate_tools() -> bool:
+    """Export the public .cer + the trust script so other PCs can trust it."""
+    if sys.platform != "win32":
+        return False
+    log("PUBLISHING CERTIFICATE / TRUST TOOL", "STEP")
+    cert_dir = DIST_DIR / "certificates"
+    cert_dir.mkdir(parents=True, exist_ok=True)
+    cer_path = cert_dir / "AttendanceControl_codesigning.cer"
+    export = r'''
+$certName = '@@CERT_NAME@@'
+$out = '@@CER@@'
+$c = Get-ChildItem -Path 'Cert:\CurrentUser\My' -CodeSigningCert | Where-Object { $_.Subject -like "*$certName*" } | Select-Object -First 1
+if (-not $c) { Write-Output 'CERT_NOT_FOUND'; exit 1 }
+[IO.File]::WriteAllBytes($out, $c.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+Write-Output ("CERT_EXPORTED=" + $out)
+exit 0
+'''.replace("@@CERT_NAME@@", CERT_NAME).replace("@@CER@@", str(cer_path))
+    result = _powershell(export, timeout=60)
+    if result is None or result.returncode != 0 or not cer_path.exists():
+        log("Could not export the certificate", "WARNING")
+        return False
+    log(f"Exported: {cer_path.name}", "SUCCESS")
+    (cert_dir / "trust_certificate.ps1").write_text(TRUST_PS1, encoding="utf-8")
+    (cert_dir / "INSTALL.txt").write_text(INSTALL_TXT, encoding="utf-8")
+    log("Written: trust_certificate.ps1 + INSTALL.txt", "SUCCESS")
+    return True
+
+
 def create_self_signed_certificate() -> bool:
     """Find (or create) the code-signing certificate and make it trusted.
 
@@ -456,6 +549,11 @@ def create_distribution_package(exe_path: Path, onefile: bool, signed: bool, mak
             shutil.copy2(source, pkg_dir / dest_name)
             log(f"Copied: {dest_name}", "SUCCESS")
 
+    certificates = exe_path.parent / "certificates"
+    if certificates.exists():
+        shutil.copytree(certificates, pkg_dir / "certificates", dirs_exist_ok=True)
+        log("Copied: certificates/ (signing trust tool)", "SUCCESS")
+
     manifest = pkg_dir / "build_info.txt"
     signature_status = "Signed (self-signed, see below)" if signed else "NOT signed"
     manifest.write_text(
@@ -572,6 +670,7 @@ def main() -> None:
             signed = True
             if not args.no_verify:
                 verify_signature(exe_path)
+            publish_certificate_tools()
         else:
             log("Signing skipped or not valid", "WARNING")
     else:

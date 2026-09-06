@@ -221,6 +221,43 @@ next to the executable in the `dist` folder:
 - `README.md`
 - `GUIDE.md`
 
+### Production build (versioned + signed)
+
+`build_app.py` is an optional production build that produces the same single-file
+EXE but also embeds Windows file/version info, signs the EXE with a code-signing
+certificate, verifies the signature and builds a ready-to-ship `distribution/`
+folder (EXE + docs + a `build_info.txt` manifest with the file hash):
+
+```powershell
+python build_app.py                  # full build: PyInstaller + version + sign + package
+python build_app.py --sign-existing  # sign/package the already-built dist EXE (fast)
+python build_app.py --no-sign        # skip signing (macOS/Linux)
+python build_app.py --onedir         # folder build instead of a single file
+```
+
+Output:
+
+- `dist/AttendanceControl.exe` — signed, with Company / Product / FileVersion
+  metadata, plus `LICENSE.txt`, `README.md` and `GUIDE.md` next to it;
+- `distribution/AttendanceControl_v1.0.0/` + `.zip` — the distribution package;
+- `dist/certificates/` — the code-signing certificate and a one-click trust tool.
+
+The signing certificate is self-signed (created once on the build PC), which is
+free. Other Windows PCs do not trust it yet, so they may show **“Unknown
+publisher”** — that only means the *publisher is not yet trusted*, not that the
+file is unsafe. To make the signature fully trusted on the PCs you deploy to
+(free — no paid certificate authority needed), run once per PC as Administrator:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File certificates\trust_certificate.ps1
+```
+
+That installs `AttendanceControl_codesigning.cer` into **Trusted Root** so the EXE
+then shows a valid signature with the real publisher. On a domain, push the same
+`.cer` via Group Policy (*Trusted Root Certification Authorities*) instead.
+Publicly trusted code-signing certificates that every Windows PC accepts out of
+the box are commercial and paid. See `dist/certificates/INSTALL.txt` for details.
+
 The application stores its database, logs, backups, exports and offline queue in the
 folder where the EXE is located (see `app.config.app_dir`). A native Windows executable
 must be built and tested on Windows; macOS cannot produce the final `.exe` through this
