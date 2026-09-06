@@ -1,0 +1,19 @@
+Product: Attendance Control
+Version: 1.0.0
+Built:   2026-09-06 16:32:04
+Python:  3.14.0
+Copyright: Copyright (c) 2026 Csepregi Artur. All rights reserved.
+Contact: https://csepregiartur.github.io
+
+Executable: AttendanceControl.exe
+SHA256: 15908b084484364142220b29d8be3abe1322c7938d0d47a2d8734480bd8ee816
+Digital signature: Signed (self-signed, see below)
+Verify: right-click the EXE -> Properties -> Digital Signatures.
+
+Self-signed certificates are not issued by a public CA, so Windows may
+still warn 'unknown publisher'. The signature confirms the file has not
+been modified since it was built on this machine.
+
+Distribution contents:
+  AttendanceControl.exe  the application (needs the other files' folder)
+  LICENSE.txt / README.md / GUIDE.md   licensing & documentation

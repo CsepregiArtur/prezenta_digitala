@@ -25,7 +25,6 @@ data/
 
 # Build output
 build/
-dist/
 *.spec
 
 # Editors / OS
