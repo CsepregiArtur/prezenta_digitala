@@ -23,6 +23,9 @@ UI_RO = {
     'Settings': 'Setări', 'System Logs': 'Jurnale de sistem',
     'Backup / Restore': 'Backup / Restaurare', 'Synchronization': 'Sincronizare',
     'Kiosk': 'Chioșc', 'Dashboard': 'Panou',
+    'About & License': 'Despre și licență',
+    'Licensed to': 'Licențiat către', 'Contact: ': 'Contact: ',
+    'Full license text:': 'Textul complet al licenței:',
     'ATTENDANCE CONTROL — DASHBOARD': 'CONTROL PONTARE — PANOU',
     'Employees scan their badge. Administrators can sign in to manage the system.':
         'Angajații scanează ecusonul. Administratorii se pot autentifica pentru a gestiona sistemul.',

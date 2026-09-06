@@ -1,4 +1,4 @@
-"""Offscreen PySide6 checks that the full admin shell (15 pages) constructs and
+"""Offscreen PySide6 checks that the full admin shell (16 pages) constructs and
 that its data-backed pages (dashboard cards, reports) respond to live data.
 These run headlessly via QT_QPA_PLATFORM=offscreen.
 """
@@ -44,10 +44,10 @@ def db(tmp_path):
 def test_shell_constructs_with_all_pages(application, db):
     from app.ui import MainWindow
     window = MainWindow(db, AttendanceEngine(db), username='admin')
-    assert window.pages.count() == 15
+    assert window.pages.count() == 16
     names = [type(window.pages.widget(i)).__name__ for i in range(window.pages.count())]
     assert 'DashboardPage' in names and 'HardwarePage' in names and 'ReportsPage' in names
-    assert 'ExcelExportPage' in names and 'SyncPage' in names and 'Kiosk' in names
+    assert 'ExcelExportPage' in names and 'SyncPage' in names and 'Kiosk' in names and 'AboutPage' in names
     window.close()
 
 

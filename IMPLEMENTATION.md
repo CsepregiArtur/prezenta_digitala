@@ -17,7 +17,8 @@ python3 -m pytest -q
 Current result: **36 passed**.
 
 An offscreen PySide6 suite additionally verified that the desktop shell constructs
-and reloads successfully with **15 pages** (including the new Synchronization page),
+and reloads successfully with **16 pages** (including the new Synchronization and
+About & License pages),
 that the dashboard cards reflect live scans, and that Reports aggregates are correct.
 
 The application now **boots directly into the full-screen employee kiosk** (no admin
@@ -66,7 +67,8 @@ The main application shell currently contains these pages:
 12. Backup / Restore
 13. Automatic Exports
 14. Synchronization
-15. Kiosk
+15. About & License
+16. Kiosk
 
 ## Existing architecture used
 
@@ -94,7 +96,7 @@ full-screen `KioskShell` (`app/ui/main_window.py`): the kiosk clock/status plus 
 bottom **ADMINISTRATOR LOGIN** button.
 
 - First run: the login button shows the administrator-creation dialog.
-- After login: the admin shell (`MainWindow`, 15 pages) opens maximised and the kiosk is hidden.
+- After login: the admin shell (`MainWindow`, 16 pages) opens maximised and the kiosk is hidden.
 - The admin window has an always-visible toolbar (and matching **Session** menu): **Log out → Kiosk**
   and **Close App**, plus the current administrator name.
 - Session → Log Out / Switch User or Lock / Return to Kiosk (or closing the admin
@@ -125,7 +127,7 @@ executed on this macOS host:
 
 1. Build `dist/AttendanceControl.exe` on Windows with `build_exe.bat` and smoke-test the packaged application (data/log/queue paths already anchor to the executable folder).
 2. Connect a Honeywell scanner in USB Serial / COM mode and validate Test Port plus the live connecting/connected/offline status on real hardware.
-3. Perform a final manual walk-through of all 15 pages, the Session menu (log out / switch user), and full-screen kiosk mode with the administrator unlock.
+3. Perform a final manual walk-through of all 16 pages, the Session menu (log out / switch user), and full-screen kiosk mode with the administrator unlock.
 
 ## Commands
 

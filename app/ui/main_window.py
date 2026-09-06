@@ -883,12 +883,44 @@ class BackupPage(QWidget):
             current = restore_database(path, self.db.path)
             self.status.setText(f'Restored successfully. Current database backed up to: {current}\nRestart Attendance Control now.')
         except Exception as error: QMessageBox.warning(self, 'Restore database', str(error))
+
+class AboutPage(QWidget):
+    """Version, licensing, copyright and contact information (admin section)."""
+    def __init__(self):
+        super().__init__()
+        from app import APP_NAME, OWNER, CONTACT_URL, LICENSE
+        layout = QVBoxLayout(self)
+        title = QLabel(f'{APP_NAME} v{APP_VERSION}', styleSheet='font-size:24px;font-weight:bold')
+        layout.addWidget(title)
+        owner = QLabel(f"{t('Licensed to')}  <b>{OWNER}</b>")
+        owner.setTextFormat(Qt.RichText)
+        layout.addWidget(owner)
+        copyright_line = QLabel('Copyright © 2026 Csepregi Artur. All rights reserved.')
+        copyright_line.setStyleSheet('color:#9fb3c4')
+        layout.addWidget(copyright_line)
+        summary = QLabel(LICENSE)
+        summary.setWordWrap(True); summary.setStyleSheet('color:#9fb3c4')
+        layout.addWidget(summary)
+        row = QHBoxLayout()
+        row.addWidget(QLabel(t('Contact: ')))
+        contact = QLabel(f'<a href="{CONTACT_URL}">{CONTACT_URL}</a>')
+        contact.setTextFormat(Qt.RichText)
+        contact.linkActivated.connect(lambda url: QDesktopServices.openUrl(QUrl(url)))
+        row.addWidget(contact); row.addStretch()
+        layout.addLayout(row)
+        layout.addWidget(QLabel(t('Full license text:'), styleSheet='font-weight:bold'))
+        license_text = QPlainTextEdit(); license_text.setReadOnly(True)
+        license_path = Path('LICENSE')
+        license_text.setPlainText(license_path.read_text(encoding='utf-8') if license_path.exists() else LICENSE)
+        layout.addWidget(license_text, 1)
+
 ICON_MAP = {
     'Dashboard': 'SP_DesktopIcon', 'Employees': 'SP_DirHomeIcon', 'Shifts': 'SP_FileIcon',
     'Attendance': 'SP_FileDialogContentsView', 'Live Scans': 'SP_FileDialogListView', 'Exceptions': 'SP_MessageBoxWarning',
     'Terminals & Scanners': 'SP_DriveHDIcon', 'Reports': 'SP_FileDialogDetailedView', 'Excel Export': 'SP_DialogSaveButton',
     'Automatic Exports': 'SP_BrowserReload', 'Settings': 'SP_FileDialogInfoView', 'System Logs': 'SP_FileDialogContentsView',
-    'Backup / Restore': 'SP_DriveFDIcon', 'Synchronization': 'SP_ArrowUp', 'Kiosk': 'SP_ComputerIcon',
+    'Backup / Restore': 'SP_DriveFDIcon', 'Synchronization': 'SP_ArrowUp', 'About & License': 'SP_MessageBoxInformation',
+    'Kiosk': 'SP_ComputerIcon',
 }
 
 class KioskShell(QMainWindow):
@@ -967,8 +999,11 @@ class MainWindow(QMainWindow):
         self.nav.setFixedWidth(215)
         nav_layout = QVBoxLayout(self.nav); nav_layout.setContentsMargins(8, 10, 8, 10); nav_layout.setSpacing(3)
         brand = QLabel('ATTENDANCE\nCONTROL'); brand.setAlignment(Qt.AlignCenter)
-        brand.setStyleSheet('font-size:16px;font-weight:bold;color:#55a9d8;padding:10px')
+        brand.setStyleSheet('font-size:16px;font-weight:bold;color:#55a9d8;padding:10px 10px 0 10px')
         nav_layout.addWidget(brand)
+        version = QLabel(f'v{APP_VERSION}', alignment=Qt.AlignCenter)
+        version.setStyleSheet('color:#7d93a6;font-size:11px;padding:0 10px 8px 10px')
+        nav_layout.addWidget(version)
         nav_scroll = QScrollArea(); nav_scroll.setWidgetResizable(True)
         nav_scroll.setFrameShape(QFrame.NoFrame)
         nav_scroll.setStyleSheet('QScrollArea{background:transparent} QScrollArea > QWidget > QWidget{background:transparent}')
@@ -1007,6 +1042,7 @@ class MainWindow(QMainWindow):
             ('System Logs', TablePage('System Logs', ['Entry'], log_rows)),
             ('Backup / Restore', BackupPage(db)),
             ('Synchronization', SyncPage(db, sync_service, offline_queue)),
+            ('About & License', AboutPage()),
             ('Kiosk', self.kiosk_page),
         ]
         self.page_widgets = {}
@@ -1041,6 +1077,8 @@ class MainWindow(QMainWindow):
         self._update_session_label()
         localize_window(self)
         self._update_session_label()
+        self.statusBar().addPermanentWidget(QLabel(f'v{APP_VERSION}'))
+        self.statusBar().addPermanentWidget(QLabel('© 2026 Csepregi Artur'))
 
     def _build_session_toolbar(self):
         """Always-visible controls: current administrator, log out to kiosk, close the app."""
