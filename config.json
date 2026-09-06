@@ -1,0 +1,7 @@
+{
+  "site_name": "Company",
+  "timezone": "Europe/Bucharest",
+  "duplicate_scan_seconds": 5,
+  "ui_theme": "dark",
+  "default_export_directory": "exports"
+}

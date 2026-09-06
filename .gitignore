@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Runtime data (contains personal attendance data) — never commit
+attendance.db
+*.db
+backup/
+logs/
+exports/
+barcodes/
+data/
+
+# Build output
+build/
+dist/
+*.spec
+
+# OS
+.DS_Store
+Thumbs.db
