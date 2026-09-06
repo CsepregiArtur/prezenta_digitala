@@ -5,12 +5,20 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+env/
+.env
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
+.pylint.d/
 
 # Runtime data (contains personal attendance data) — never commit
 attendance.db
 *.db
 backup/
 logs/
+*.log
 exports/
 barcodes/
 data/
@@ -20,6 +28,12 @@ build/
 dist/
 *.spec
 
-# OS
+# Editors / OS
 .DS_Store
 Thumbs.db
+.idea/
+*.iml
+.vscode/*.log
+*~
+*.swp
+*.pem

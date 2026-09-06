@@ -35,6 +35,7 @@ UI_RO = {
     'Log Out / Switch User…': 'Deconectare / Schimbă utilizator…',
     'Exit': 'Ieșire', 'Close App': 'Închide aplicația',
     'Log out → Kiosk': 'Deconectare → Chioșc',
+    'About Attendance Control': 'Despre Attendance Control',
     'Session controls': 'Comenzi sesiune',
     'Return to the kiosk screen (administrator login required to come back)':
         'Revenire la ecranul chioșcului (autentificare administrator necesară pentru revenire)',

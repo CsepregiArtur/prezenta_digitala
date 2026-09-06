@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-from PySide6.QtCore import QTimer, Qt, QDate, QTime, QThread, Signal, QSize
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtCore import QTimer, Qt, QDate, QTime, QThread, Signal, QSize, QUrl
+from PySide6.QtGui import QAction, QDesktopServices, QIcon
 from PySide6.QtWidgets import *
 from PySide6.QtWidgets import QStyle
 from app.services import EmployeeService, ShiftService, AdminDataService
@@ -11,6 +11,7 @@ from app.auth import AuthService
 from app.scheduler import next_run_time, schedule_text, WEEKDAYS
 from app.ui.login import AdminLoginDialog
 from app.i18n import t, reason_text, localize_window, format_kiosk_date
+from app import __version__ as APP_VERSION
 
 DARK='''QWidget{background:#14191f;color:#e8edf2;font-family:Segoe UI} QPushButton{background:#2374ab;padding:9px;border-radius:5px;text-align:left} QPushButton:hover{background:#318bc4} QPushButton:checked{background:#55a9d8;border-left:4px solid #ffffff;font-weight:bold} QTableWidget{background:#1c242d;color:#e8edf2;alternate-background-color:#212c37;gridline-color:#34414d;selection-background-color:#2374ab;selection-color:#ffffff} QTableView::item:selected{background:#2374ab;color:#ffffff} QHeaderView::section{background:#263542;color:#e8edf2;padding:7px;border:0} QLineEdit,QComboBox,QDateEdit,QTimeEdit,QSpinBox{background:#222d36;border:1px solid #425464;padding:6px;border-radius:4px}'''
 def cell(x): return QTableWidgetItem('—' if x is None or x=='' else str(x))
@@ -955,7 +956,7 @@ class MainWindow(QMainWindow):
         self.kiosk_window = None
         data = AdminDataService(db)
         site = data.settings().get('site_name', 'Company')
-        self.setWindowTitle(f'Attendance Control — {site}')
+        self.setWindowTitle(f'Attendance Control v{APP_VERSION} — {site}')
         self.resize(1380, 840)
 
         central = QWidget(); self.setCentralWidget(central)
@@ -1032,8 +1033,10 @@ class MainWindow(QMainWindow):
         lock_action = QAction('Lock / Return to Kiosk', self); lock_action.triggered.connect(self.return_to_kiosk)
         logout_action = QAction('Log Out / Switch User…', self); logout_action.triggered.connect(self.logout)
         exit_action = QAction('Exit', self); exit_action.triggered.connect(self._exit_app)
+        about_action = QAction('About Attendance Control', self); about_action.triggered.connect(self.show_about)
         session_menu.addAction(kiosk_action); session_menu.addAction(lock_action)
-        session_menu.addAction(logout_action); session_menu.addSeparator(); session_menu.addAction(exit_action)
+        session_menu.addAction(logout_action); session_menu.addSeparator()
+        session_menu.addAction(about_action); session_menu.addSeparator(); session_menu.addAction(exit_action)
         self._build_session_toolbar()
         self._update_session_label()
         localize_window(self)
@@ -1098,6 +1101,20 @@ class MainWindow(QMainWindow):
         self._on_kiosk_return = None
         QTimer.singleShot(0, callback)
         self.close()
+
+    def show_about(self):
+        from app import APP_NAME, OWNER, CONTACT_URL, LICENSE
+        html = (f'<h3>{APP_NAME} v{APP_VERSION}</h3>'
+                f'<p>Licensed to <b>{OWNER}</b></p>'
+                f'<p>{LICENSE}</p>'
+                f'<p>Contact: <a href="{CONTACT_URL}">{CONTACT_URL}</a></p>')
+        box = QMessageBox(self)
+        box.setWindowTitle(t('About Attendance Control'))
+        box.setIcon(QMessageBox.Information)
+        box.setTextFormat(Qt.RichText)
+        box.setText(html)
+        box.linkActivated.connect(lambda url: QDesktopServices.openUrl(QUrl(url)))
+        box.exec()
 
     def _exit_app(self):
         """Quit the whole application (used by Session > Exit)."""

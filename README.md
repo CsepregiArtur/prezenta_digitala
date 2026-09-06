@@ -5,6 +5,9 @@ Attendance Control is a local desktop application for employee time tracking. Em
 > 📖 **Full setup & user guide (English + Română):** see [`GUIDE.md`](GUIDE.md).
 > Example import files: `examples/employees_import_template.xlsx` / `.csv`.
 
+**Attendance Control v1.0.0** — © 2026 **Csepregi Artur**. All rights reserved.
+See [`LICENSE`](LICENSE). Contact: <https://csepregiartur.github.io>
+
 ## What it does
 
 - Creates employees with sequential IDs such as `EMP000001`, individually or by importing a whole list from an **Excel/CSV file** (template generator included).
