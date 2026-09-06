@@ -12,7 +12,9 @@ class Database:
         Base.metadata.create_all(self.engine); self._migrate(); self.Session=sessionmaker(self.engine, expire_on_commit=False)
     def _migrate(self):
         """Add columns introduced after a database already exists (idempotent)."""
-        for table, column, ddl in [('export_jobs','weekday','INTEGER'),('export_jobs','month_day','INTEGER')]:
+        for table, column, ddl in [('export_jobs','weekday','INTEGER'),('export_jobs','month_day','INTEGER'),
+                                   ('employees','rotation_id','INTEGER'),('employees','rotation_start','DATE'),
+                                   ('employees','rotation_start_shift_id','INTEGER')]:
             try:
                 with self.engine.begin() as conn: conn.execute(text(f'ALTER TABLE {table} ADD COLUMN {column} {ddl}'))
             except Exception: pass

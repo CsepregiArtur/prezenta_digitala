@@ -71,6 +71,14 @@ UI_RO = {
     'Name': 'Nume', 'Early IN minutes': 'Minute intrare timpurie',
     'Earliest OUT minutes': 'Minute ieșire permisă',
 
+    # Shift rotations page
+    'Shift Rotations': 'Rotații de ture', 'Members': 'Membri',
+    'Shift order': 'Ordinea turelor', 'Add Rotation': 'Adaugă rotație',
+    'Edit Rotation': 'Editează rotație', 'Rotation': 'Rotație',
+    'No rotation': 'Fără rotație', 'Starting shift (today)': 'Tura de pornire (azi)',
+    'Add': 'Adaugă', 'Up': 'Sus', 'Down': 'Jos', 'Remove': 'Elimină',
+    'Delete rotation': 'Șterge rotația',
+
     # Hardware page
     'Add Terminal': 'Adaugă terminal', 'Add Scanner': 'Adaugă scanner',
     'Enable / Disable': 'Activează / Dezactivează', 'Delete': 'Șterge',

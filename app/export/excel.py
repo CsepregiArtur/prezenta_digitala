@@ -5,6 +5,7 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 from sqlalchemy import select
 from app.database.models import Employee, Shift, AttendanceSession, ScanEvent, ExceptionRecord
+from app.attendance.rotation import shift_id_for
 
 SHEET_NAMES = ['Attendance Summary', 'Raw Scans', 'Exceptions', 'Employees', 'Shifts']
 
@@ -37,7 +38,14 @@ class ExcelExporter:
             if 'Exceptions' in sheets:
                 self._write(sheets['Exceptions'], ['Timestamp', 'Employee', 'Problem', 'Terminal', 'Scanner', 'Details'], [[x.timestamp, x.employee_id or '', x.problem, x.terminal_id or '', x.scanner_id or '', x.details or ''] for x in s.scalars(select(ExceptionRecord))])
             if 'Employees' in sheets:
-                self._write(sheets['Employees'], ['Employee ID', 'Number', 'First Name', 'Last Name', 'Department', 'Position', 'Active', 'Shift'], [[e.employee_id, e.employee_number or '', e.first_name, e.last_name, e.department or '', e.position or '', e.active, e.assigned_shift_id or ''] for e in s.scalars(select(Employee))])
+                shift_names = {x.id: x.name for x in s.scalars(select(Shift))}
+                employee_rows = []
+                for e in s.scalars(select(Employee)):
+                    shift_id = shift_id_for(s, e, date.today())
+                    shift_name = shift_names.get(shift_id, '') if shift_id else ''
+                    employee_rows.append([e.employee_id, e.employee_number or '', e.first_name, e.last_name,
+                                          e.department or '', e.position or '', e.active, shift_name])
+                self._write(sheets['Employees'], ['Employee ID', 'Number', 'First Name', 'Last Name', 'Department', 'Position', 'Active', 'Shift'], employee_rows)
             if 'Shifts' in sheets:
                 self._write(sheets['Shifts'], ['Name', 'Start', 'End', 'Early clock-in min', 'Earliest clock-out min', 'Active'], [[x.name, x.start_time, x.end_time, x.early_clock_in_minutes, x.earliest_clock_out_minutes, x.active] for x in s.scalars(select(Shift))])
         wb.save(path); return path

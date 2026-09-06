@@ -1,6 +1,6 @@
 from __future__ import annotations
-from datetime import datetime
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Time
+from datetime import datetime, date
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, Time
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class Base(DeclarativeBase): pass
@@ -8,8 +8,12 @@ class User(Base):
     __tablename__='users'; id: Mapped[int]=mapped_column(primary_key=True); username: Mapped[str]=mapped_column(String(80),unique=True); password_hash: Mapped[str]=mapped_column(String(256)); created_at: Mapped[datetime]=mapped_column(DateTime,default=datetime.now)
 class Shift(Base):
     __tablename__='shifts'; id: Mapped[int]=mapped_column(primary_key=True); name: Mapped[str]=mapped_column(String(100),unique=True); start_time: Mapped[datetime.time]=mapped_column(Time); end_time: Mapped[datetime.time]=mapped_column(Time); early_clock_in_minutes: Mapped[int]=mapped_column(Integer,default=60); earliest_clock_out_minutes: Mapped[int]=mapped_column(Integer,default=10); active: Mapped[bool]=mapped_column(Boolean,default=True)
+class ShiftRotation(Base):
+    __tablename__='shift_rotations'; id: Mapped[int]=mapped_column(primary_key=True); name: Mapped[str]=mapped_column(String(100),unique=True); active: Mapped[bool]=mapped_column(Boolean,default=True)
+class RotationShift(Base):
+    __tablename__='rotation_shifts'; id: Mapped[int]=mapped_column(primary_key=True); rotation_id: Mapped[int]=mapped_column(ForeignKey('shift_rotations.id')); shift_id: Mapped[int]=mapped_column(ForeignKey('shifts.id')); position: Mapped[int]=mapped_column(Integer)
 class Employee(Base):
-    __tablename__='employees'; employee_id: Mapped[str]=mapped_column(String(20),primary_key=True); employee_number: Mapped[str|None]=mapped_column(String(50)); first_name: Mapped[str]=mapped_column(String(100)); last_name: Mapped[str]=mapped_column(String(100)); department: Mapped[str|None]=mapped_column(String(100)); position: Mapped[str|None]=mapped_column(String(100)); active: Mapped[bool]=mapped_column(Boolean,default=True); assigned_shift_id: Mapped[int|None]=mapped_column(ForeignKey('shifts.id')); created_at: Mapped[datetime]=mapped_column(DateTime,default=datetime.now); updated_at: Mapped[datetime]=mapped_column(DateTime,default=datetime.now,onupdate=datetime.now)
+    __tablename__='employees'; employee_id: Mapped[str]=mapped_column(String(20),primary_key=True); employee_number: Mapped[str|None]=mapped_column(String(50)); first_name: Mapped[str]=mapped_column(String(100)); last_name: Mapped[str]=mapped_column(String(100)); department: Mapped[str|None]=mapped_column(String(100)); position: Mapped[str|None]=mapped_column(String(100)); active: Mapped[bool]=mapped_column(Boolean,default=True); assigned_shift_id: Mapped[int|None]=mapped_column(ForeignKey('shifts.id')); rotation_id: Mapped[int|None]=mapped_column(ForeignKey('shift_rotations.id')); rotation_start: Mapped[date|None]=mapped_column(Date); rotation_start_shift_id: Mapped[int|None]=mapped_column(ForeignKey('shifts.id')); created_at: Mapped[datetime]=mapped_column(DateTime,default=datetime.now); updated_at: Mapped[datetime]=mapped_column(DateTime,default=datetime.now,onupdate=datetime.now)
 class Terminal(Base):
     __tablename__='terminals'; id: Mapped[int]=mapped_column(primary_key=True); name: Mapped[str]=mapped_column(String(100),unique=True); active: Mapped[bool]=mapped_column(Boolean,default=True)
 class Scanner(Base):

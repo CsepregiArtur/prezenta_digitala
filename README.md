@@ -13,6 +13,7 @@ See [`LICENSE`](LICENSE). Contact: <https://csepregiartur.github.io>
 - Creates employees with sequential IDs such as `EMP000001`, individually or by importing a whole list from an **Excel/CSV file** (template generator included).
 - Generates a Code 128 barcode containing **only** the employee ID.
 - Supports regular and overnight shifts, early arrival, and earliest permitted clock-out rules.
+- Supports **weekly rotating shifts**: shifts in a rotation advance every Monday, and the current week’s shift drives validation, listings, and exports.
 - Decides whether a valid scan is IN or OUT based on an employee’s active session.
 - Blocks duplicate scans within a configurable period (five seconds by default).
 - Retains every scan attempt, including unknown, inactive, too-early, and duplicate scans.
@@ -33,7 +34,7 @@ Employees do not log in. They only scan their personal barcode. The application 
 
 Administrators authenticate with a username and password (passwords use PBKDF2-SHA256 with a random salt; no plain-text password is stored or logged). On the kiosk screen, click **ADMINISTRATOR LOGIN** to open the login dialog — the first run instead creates the administrator. A successful login opens the admin shell, whose toolbar (and the **Session** menu) offers **Log out → Kiosk** and **Close App**: logging out or closing the admin window returns to the kiosk, while **Close App** exits Attendance Control. Admin services cover employee and shift setup, scanner configuration, exports, backups, and audit activity.
 
-> The desktop shell includes Dashboard, Employees, Shifts, Attendance, Live Scans, Exceptions, Terminals & Scanners, Reports, Excel Export, Settings, System Logs, Backup / Restore, Automatic Exports, Synchronization, and Kiosk pages. These pages use the existing SQLite database and service layer; attendance validation remains in the dedicated attendance engine. The Session menu lets the administrator log out / switch users or launch the full-screen kiosk mode.
+> The desktop shell includes Dashboard, Employees, Shifts, Shift Rotations, Attendance, Live Scans, Exceptions, Terminals & Scanners, Reports, Excel Export, Settings, System Logs, Backup / Restore, Automatic Exports, Synchronization, and Kiosk pages. These pages use the existing SQLite database and service layer; attendance validation remains in the dedicated attendance engine. The Session menu lets the administrator log out / switch users or launch the full-screen kiosk mode.
 
 ## Requirements
 
@@ -124,6 +125,29 @@ Example: a 06:00–14:00 shift with 60 minutes early arrival and a 10 minute ear
 - A second scan by the same employee within the duplicate window is rejected as `DUPLICATE_SCAN`.
 
 Overnight shifts work too: for a 22:00–06:00 shift, an IN at 21:30 and OUT at 06:03 the following day are accepted.
+
+### Rotating shifts (weekly)
+
+Shifts can rotate between employees **every Monday**. A rotation is an ordered
+cycle of shifts; each member moves to the next shift in the cycle every week. For
+a cycle `[Schimb 1, Schimb 2, Schimb 3]` with employees starting staggered on
+shifts 1, 2 and 3:
+
+| Week | A | B | C |
+| --- | --- | --- | --- |
+| 1 | Schimb 1 | Schimb 2 | Schimb 3 |
+| 2 | Schimb 3 | Schimb 1 | Schimb 2 |
+| 3 | Schimb 2 | Schimb 3 | Schimb 1 |
+| 4 | Schimb 1 | Schimb 2 | Schimb 3 (repeats) |
+
+Configure rotations under **Shift Rotations** (an ordered list of at least two
+shifts, e.g. `Schimb 1 → Schimb 2 → Schimb 3`). On the **Employees** page pick a
+**Rotation** and a **Starting shift (today)** for each member — the shift they are
+on right now, which must be part of the rotation. Rotating employees are then
+validated against the shift that applies to the **current week**; past sessions
+keep the shift recorded when they clocked in. Setting an employee back to
+*No rotation* returns them to their fixed **Shift**. A full walkthrough is in the
+**Shifts** section of `GUIDE.md`.
 
 ## Scanner setup
 

@@ -1,7 +1,8 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import date, datetime
 from sqlalchemy import select
-from app.database.models import Employee, Shift, AttendanceSession, ScanEvent, ExceptionRecord, Terminal, Scanner, ApplicationSetting, ExportJob
+from app.database.models import Employee, Shift, AttendanceSession, ScanEvent, ExceptionRecord, Terminal, Scanner, ApplicationSetting, ExportJob, ShiftRotation, RotationShift
+from app.attendance.rotation import monday_on_or_before, weeks_since, effective_index
 from app.barcode import generate_barcode
 
 class EmployeeService:
@@ -80,6 +81,101 @@ class ShiftService:
             if not item: raise ValueError('Shift not found')
             for key in {'name','start_time','end_time','early_clock_in_minutes','earliest_clock_out_minutes','active'} & values.keys(): setattr(item,key,values[key])
             s.commit()
+
+class RotationService:
+    """Weekly shift-rotation configuration.
+
+    A rotation is an ordered cycle of shifts; members move one shift along the
+    cycle every Monday (see app.attendance.rotation for the exact rule).
+    """
+    def __init__(self, db): self.db=db
+    def _cycle(self, s, rotation_id):
+        return list(s.scalars(select(RotationShift.shift_id).where(RotationShift.rotation_id==rotation_id).order_by(RotationShift.position)))
+    def list(self):
+        """Return [(ShiftRotation, [Shift, ...], member_count)] ordered by name."""
+        with self.db.session() as s:
+            rotations=list(s.scalars(select(ShiftRotation).order_by(ShiftRotation.name)))
+            shifts={x.id: x for x in s.scalars(select(Shift))}
+            counts={}
+            for r_id, in s.execute(select(Employee.rotation_id).where(Employee.rotation_id.isnot(None))): counts[r_id]=counts.get(r_id,0)+1
+            return [(r,[shifts[sid] for sid in self._cycle(s,r.id) if sid in shifts],counts.get(r.id,0)) for r in rotations]
+    def create(self, name, shift_ids):
+        if not name.strip(): raise ValueError('Name is required')
+        if len(shift_ids) < 2: raise ValueError('Add at least two shifts to the rotation')
+        if len(set(shift_ids)) != len(shift_ids): raise ValueError('A rotation cannot repeat the same shift')
+        with self.db.session() as s:
+            rotation=ShiftRotation(name=name.strip()); s.add(rotation); s.flush()
+            for position, sid in enumerate(shift_ids): s.add(RotationShift(rotation_id=rotation.id, shift_id=sid, position=position))
+            s.commit(); return rotation.id
+    def update(self, rotation_id, name=None, shift_ids=None, active=None):
+        with self.db.session() as s:
+            rotation=s.get(ShiftRotation, rotation_id)
+            if not rotation: raise ValueError('Rotation not found')
+            if name is not None:
+                if not name.strip(): raise ValueError('Name is required')
+                rotation.name=name.strip()
+            if active is not None: rotation.active=bool(active)
+            if shift_ids is not None:
+                if len(shift_ids) < 2: raise ValueError('A rotation needs at least two shifts')
+                if len(set(shift_ids)) != len(shift_ids): raise ValueError('A rotation cannot repeat the same shift')
+                for item in s.scalars(select(RotationShift).where(RotationShift.rotation_id==rotation_id)): s.delete(item)
+                for position, sid in enumerate(shift_ids): s.add(RotationShift(rotation_id=rotation_id, shift_id=sid, position=position))
+            s.commit()
+    def delete(self, rotation_id):
+        with self.db.session() as s:
+            if not s.get(ShiftRotation, rotation_id): raise ValueError('Rotation not found')
+            for e in s.scalars(select(Employee).where(Employee.rotation_id==rotation_id)):
+                e.rotation_id=None; e.rotation_start=None; e.rotation_start_shift_id=None
+            for item in s.scalars(select(RotationShift).where(RotationShift.rotation_id==rotation_id)): s.delete(item)
+            s.delete(s.get(ShiftRotation, rotation_id)); s.commit()
+    def assign(self, employee_id, rotation_id, start_shift_id=None, anchor=None):
+        """Put an employee on (or off, when rotation_id is None) a rotation.
+
+        ``start_shift_id`` is the shift they occupy today (defaults to the
+        employee's assigned shift); ``anchor`` defaults to today. The week is
+        stored as its Monday so the schedule is deterministic from that point.
+        """
+        with self.db.session() as s:
+            employee=s.get(Employee, employee_id)
+            if not employee: raise ValueError('Employee not found')
+            if rotation_id is None:
+                employee.rotation_id=None; employee.rotation_start=None; employee.rotation_start_shift_id=None; s.commit(); return
+            rotation=s.get(ShiftRotation, rotation_id)
+            if not rotation or not rotation.active: raise ValueError('Rotation not found or inactive')
+            cycle=self._cycle(s, rotation_id)
+            if len(cycle) < 2: raise ValueError('This rotation has no shifts yet')
+            start_shift_id = start_shift_id if start_shift_id is not None else employee.assigned_shift_id
+            if start_shift_id is None: start_shift_id=cycle[0]
+            if start_shift_id not in cycle: raise ValueError('Starting shift is not part of this rotation')
+            employee.rotation_id=rotation_id
+            employee.rotation_start=monday_on_or_before(anchor if anchor is not None else date.today())
+            employee.rotation_start_shift_id=start_shift_id
+            if employee.assigned_shift_id is None: employee.assigned_shift_id=start_shift_id
+            s.commit()
+    def current_shift_map(self, on_date=None):
+        """Return {employee_id: effective_shift_id} for a date (default: today).
+
+        Rotation members get the shift their rotation yields that week; everyone
+        else keeps their fixed assigned shift. One query pass over the database.
+        """
+        on = on_date if on_date is not None else date.today()
+        result={}
+        with self.db.session() as s:
+            rotations={r.id: r for r in s.scalars(select(ShiftRotation))}
+            cycles={}
+            for item in s.scalars(select(RotationShift).order_by(RotationShift.rotation_id, RotationShift.position)):
+                cycles.setdefault(item.rotation_id, []).append(item.shift_id)
+            for e in s.scalars(select(Employee)):
+                shift_id=e.assigned_shift_id
+                rotation=rotations.get(e.rotation_id) if e.rotation_id else None
+                ids=cycles.get(e.rotation_id) if e.rotation_id else None
+                if (rotation and rotation.active and e.rotation_start and e.rotation_start_shift_id and ids
+                        and e.rotation_start_shift_id in ids):
+                    delta=weeks_since(e.rotation_start, on)
+                    start=ids.index(e.rotation_start_shift_id)
+                    shift_id=ids[effective_index(len(ids), start, delta)]
+                result[e.employee_id]=shift_id
+        return result
 
 class AdminDataService:
     """UI-facing queries and safe configuration persistence; no attendance rules live here."""

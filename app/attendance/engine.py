@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from sqlalchemy import select, desc
 from app.database.models import Employee, Shift, AttendanceSession, ScanEvent, ExceptionRecord
+from app.attendance.rotation import shift_id_for
 
 @dataclass(frozen=True)
 class ScannerEvent: barcode: str; timestamp: datetime; terminal_id: int | None; scanner_id: str | None
@@ -23,8 +24,15 @@ class AttendanceEngine:
     def process(self,event: ScannerEvent) -> AttendanceResult:
         now=self._local(event.timestamp); barcode=event.barcode.strip().upper()
         with self.db.session() as s:
-            employee=s.get(Employee,barcode); shift=s.get(Shift,employee.assigned_shift_id) if employee and employee.assigned_shift_id else None
+            employee=s.get(Employee,barcode)
             active=s.scalar(select(AttendanceSession).where(AttendanceSession.employee_id==barcode,AttendanceSession.clock_out.is_(None)).order_by(desc(AttendanceSession.clock_in))) if employee else None
+            shift=None
+            if employee:
+                # For an OUT the shift recorded on the open session applies; for an
+                # IN resolve the weekly rotation so the right shift is validated.
+                shift_id = active.shift_id if active else None
+                if shift_id is None: shift_id = shift_id_for(s, employee, now.date())
+                shift = s.get(Shift, shift_id) if shift_id is not None else None
             action='OUT' if active else 'IN'; reason=None
             if not employee: reason='UNKNOWN_BARCODE'; action='UNKNOWN'
             elif not employee.active: reason='INACTIVE_EMPLOYEE'; action='REJECTED'

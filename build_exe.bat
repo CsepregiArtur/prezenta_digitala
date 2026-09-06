@@ -10,12 +10,14 @@ py -m PyInstaller --noconfirm --clean --onefile --windowed ^
   app\main.py
 
 REM Ship licensing and documentation alongside the executable.
-if exist dist\AttendanceControl.exe (
-  copy /Y LICENSE  dist\LICENSE.txt >nul
-  copy /Y README.md dist\README.md >nul
-  copy /Y GUIDE.md  dist\GUIDE.md >nul
-  echo Build complete: dist\AttendanceControl.exe (single file + docs)
-) else (
-  echo Build failed - dist\AttendanceControl.exe was not created.
-  exit /b 1
-)
+if not exist "dist\AttendanceControl.exe" goto :fail
+
+copy /Y LICENSE  "dist\LICENSE.txt" >nul
+copy /Y README.md "dist\README.md" >nul
+copy /Y GUIDE.md  "dist\GUIDE.md" >nul
+echo Build complete: dist\AttendanceControl.exe ^(single file + docs^)
+exit /b 0
+
+:fail
+echo Build failed - dist\AttendanceControl.exe was not created.
+exit /b 1

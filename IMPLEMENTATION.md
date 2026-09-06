@@ -14,11 +14,11 @@ Last verified: 6 September 2026
 python3 -m pytest -q
 ```
 
-Current result: **36 passed**.
+Current result: **42 passed**.
 
 An offscreen PySide6 suite additionally verified that the desktop shell constructs
-and reloads successfully with **16 pages** (including the new Synchronization and
-About & License pages),
+and reloads successfully with **17 pages** (including Synchronization, About & License,
+and the Shift Rotations page),
 that the dashboard cards reflect live scans, and that Reports aggregates are correct.
 
 The application now **boots directly into the full-screen employee kiosk** (no admin
@@ -45,9 +45,10 @@ port, which the running app reads exactly like a real COM scanner.
 | 11. Authentication, backup/restore, audit logs | ✅ Complete | Secure PBKDF2 auth, first-run administrator creation/login dialog, change-password UI, audit model, readable log viewer, backup/restore with confirmation; the app boots into the kiosk and administrators sign in through the kiosk login button; a **Session** menu provides Log Out / Switch User, Lock / Return to Kiosk, full-screen **Enter Kiosk Mode** with an administrator unlock, and Exit |
 | 12. Offline queue/synchronization | ✅ Complete | Durable local SQLite queue preserves failed scanner events and replays them in arrival order through the existing engine. A new Synchronization page configures `sync_enabled`, server URL, token and interval; `app/sync.SyncService` drains the offline queue and pushes unsynchronised scan events to the configured server with a last-id marker. A 30 s timer runs it when enabled; Test Connection and Synchronise Now controls included |
 | 13. UI polishing | ✅ Complete | Navigation icons (Qt standard pixmaps), scrollable nav rail, sortable/alternating tables, styled dashboard cards, colour-coded actions, shared searchable data tables, dialogs, and dark theme throughout. Interface **language setting (English / Română)** in Settings with a full Romanian UI catalog (`app/i18n.py`) applied to navigation, menus, pages, tables, kiosk, and login |
-| 14. Automated testing | ✅ Complete | **36 automated tests** covering core services/rules plus hardware CRUD, dashboard summary semantics, export-job frequency & next-run, Excel sheet selection, employee Excel/CSV import, LAN sync push & offline drain, database column migration, the threaded scanner-manager pipeline, offscreen UI construction, and row-action resolution. Interactive UI and physical serial tests remain manual |
+| 14. Automated testing | ✅ Complete | **42 automated tests** covering core services/rules plus hardware CRUD, dashboard summary semantics, export-job frequency & next-run, Excel sheet selection, employee Excel/CSV import, LAN sync push & offline drain, database column migration, the threaded scanner-manager pipeline, weekly shift rotation, offscreen UI construction, and row-action resolution. Interactive UI and physical serial tests remain manual |
 | 15. PyInstaller EXE | 🟡 Partial | `build_exe.bat` builds a **single-file** `dist/AttendanceControl.exe` (onefile, hidden imports for pyserial/openpyxl/barcode/PIL, bundled `config.json`) and copies `LICENSE.txt`, `README.md` and `GUIDE.md` into `dist/`. The app anchors data/log/queue paths to the executable folder when frozen (`app.config.app_dir`). A native Windows `.exe` must still be built and run on Windows (not possible on this macOS host) |
 | 16. Final end-to-end test | 🟡 Partial | Required accepted IN / rejected OUT / accepted OUT sequence and Excel contents are tested end-to-end; final manual UI and packaged-Windows validation must run on Windows with a physical scanner |
+| 17. Weekly shift rotation | ✅ Complete | `ShiftRotation`/`RotationShift` models plus employee `rotation_id`/`rotation_start`/`rotation_start_shift_id` columns (auto-migrated). Deterministic rule in `app/attendance/rotation.py` (members move one shift along the cycle every Monday; IN validation resolves the current week’s shift, OUT keeps the session’s shift). `RotationService` CRUD + assign/unassign; **Shift Rotations** admin page (add/edit/reorder shifts, activate/deactivate, delete) and employee Rotation / Starting-shift fields; Employees list, Excel export and engine all honour the current week. 6 dedicated tests + updated UI smoke count |
 
 ## Implemented admin pages
 
@@ -56,19 +57,20 @@ The main application shell currently contains these pages:
 1. Dashboard
 2. Employees
 3. Shifts
-4. Attendance
-5. Live Scans
-6. Exceptions
-7. Terminals & Scanners
-8. Reports
-9. Excel Export
-10. Settings
-11. System Logs
-12. Backup / Restore
-13. Automatic Exports
-14. Synchronization
-15. About & License
-16. Kiosk
+4. Shift Rotations
+5. Attendance
+6. Live Scans
+7. Exceptions
+8. Terminals & Scanners
+9. Reports
+10. Excel Export
+11. Settings
+12. System Logs
+13. Backup / Restore
+14. Automatic Exports
+15. Synchronization
+16. About & License
+17. Kiosk
 
 ## Existing architecture used
 
@@ -79,6 +81,7 @@ No second database or attendance engine was added.
 | Database | `app/database/database.py`, `app/database/models.py` |
 | Employees | `app.services.EmployeeService` |
 | Shifts | `app.services.ShiftService` |
+| Shift rotations | `app.services.RotationService` + `app.attendance.rotation` (weekly rule) |
 | Attendance validation | `app.attendance.AttendanceEngine` |
 | UI data queries | `app.services.AdminDataService` |
 | Barcode generation | `app.barcode.generate_barcode` |
@@ -96,7 +99,7 @@ full-screen `KioskShell` (`app/ui/main_window.py`): the kiosk clock/status plus 
 bottom **ADMINISTRATOR LOGIN** button.
 
 - First run: the login button shows the administrator-creation dialog.
-- After login: the admin shell (`MainWindow`, 16 pages) opens maximised and the kiosk is hidden.
+- After login: the admin shell (`MainWindow`, 17 pages) opens maximised and the kiosk is hidden.
 - The admin window has an always-visible toolbar (and matching **Session** menu): **Log out → Kiosk**
   and **Close App**, plus the current administrator name.
 - Session → Log Out / Switch User or Lock / Return to Kiosk (or closing the admin
@@ -127,7 +130,7 @@ executed on this macOS host:
 
 1. Build `dist/AttendanceControl.exe` on Windows with `build_exe.bat` and smoke-test the packaged application (data/log/queue paths already anchor to the executable folder).
 2. Connect a Honeywell scanner in USB Serial / COM mode and validate Test Port plus the live connecting/connected/offline status on real hardware.
-3. Perform a final manual walk-through of all 16 pages, the Session menu (log out / switch user), and full-screen kiosk mode with the administrator unlock.
+3. Perform a final manual walk-through of all 17 pages, the Session menu (log out / switch user), and full-screen kiosk mode with the administrator unlock.
 
 ## Commands
 

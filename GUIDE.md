@@ -88,6 +88,49 @@ Open **Shifts** and click **Add Shift**. Each shift has:
 Overnight shifts work too: for a 22:00–06:00 shift an IN at 21:30 and an OUT at
 06:03 the next day are accepted.
 
+### 3.1 Weekly shift rotation (rotating shifts)
+
+Shifts can **rotate every week** between employees. A rotation is an ordered
+cycle of shifts; every **Monday** each member moves to the next shift in the
+cycle. Example with shifts `Schimb 1`, `Schimb 2`, `Schimb 3` and employees
+A, B, C starting on shifts 1, 2 and 3:
+
+| Week | A | B | C |
+| --- | --- | --- | --- |
+| 1 | Schimb 1 | Schimb 2 | Schimb 3 |
+| 2 | Schimb 3 | Schimb 1 | Schimb 2 |
+| 3 | Schimb 2 | Schimb 3 | Schimb 1 |
+| 4 | Schimb 1 | Schimb 2 | Schimb 3 (cycle repeats) |
+
+**How to set it up:**
+
+1. On the **Shifts** page, create the shifts you want to rotate (section 3).
+2. Open **Shift Rotations** and click **Add Rotation**:
+   - Give the rotation a name (e.g. `Rotatie 3 ture`).
+   - Build the **shift order** with **Add**, then use **Up / Down** to arrange
+     it, and **Remove** to take a shift out. A rotation needs at least two shifts
+     and cannot repeat the same shift.
+3. Go to **Employees** and **Add Employee** / **Edit** an employee:
+   - **Shift** = the employee's fixed / fallback shift.
+   - **Rotation** = pick the rotation created above (or *No rotation*).
+   - **Starting shift (today)** = the shift the employee is on *right now*.
+     It must be part of the rotation.
+   To reproduce the table above, put A on Schimb 1, B on Schimb 2 and C on
+   Schimb 3 as their starting shifts on the same week.
+
+**What changes automatically:**
+
+- Every **Monday** the employee's effective shift advances to the previous shift
+  in the list (wrapping around), so everyone works every shift in turn.
+- The **Employees** list, the Excel export and **scan validation** all use the
+  shift that applies to the **current week** for rotating employees; past
+  attendance sessions keep the shift that was recorded when they clocked in.
+- Taking an employee off the rotation (set **Rotation** to *No rotation* and
+  save) returns them to their fixed **Shift**.
+- **Activate / Deactivate** pauses a whole rotation without deleting it;
+  deactivated members fall back to their fixed **Shift**. **Delete** removes the
+  rotation and its members keep their fixed shift.
+
 ---
 
 ## 4. Set up Users (Employees)
@@ -101,7 +144,9 @@ Click **Add Employee** and fill in:
 - **Employee Number** (optional — your own external number; used to avoid
   duplicates during import),
 - **Department**, **Position** (optional),
-- **Shift** (optional — pick one of the shifts you created).
+- **Shift** (optional — pick one of the shifts you created),
+- **Rotation** and **Starting shift (today)** (optional — see section 3.1 to
+  put the employee on a weekly rotating schedule).
 
 The application assigns the internal **Employee ID** automatically
 (`EMP000001`, `EMP000002`, …). **This ID is the barcode content.**
@@ -364,6 +409,50 @@ Deschideți **Shifts** și apăsați **Add Shift**. Fiecare tură are:
 Turele peste noapte funcționează: pentru o tură 22:00–06:00, o intrare la 21:30 și
 o ieșire la 06:03 a doua zi sunt acceptate.
 
+### 3.1 Rotația săptămânală a turelor (ture rotative)
+
+Turele pot **să se rotească săptămânal** între angajați. O rotație este un ciclu
+ordonat de ture; în fiecare **luni** fiecare membru trece la tura următoare din
+ciclu. Exemplu cu turele `Schimb 1`, `Schimb 2`, `Schimb 3` și angajații A, B, C
+care pornesc pe turele 1, 2 și 3:
+
+| Săptămâna | A | B | C |
+| --- | --- | --- | --- |
+| 1 | Schimb 1 | Schimb 2 | Schimb 3 |
+| 2 | Schimb 3 | Schimb 1 | Schimb 2 |
+| 3 | Schimb 2 | Schimb 3 | Schimb 1 |
+| 4 | Schimb 1 | Schimb 2 | Schimb 3 (ciclul se repetă) |
+
+**Cum se configurează:**
+
+1. Pe pagina **Shifts**, creați turele pe care vreți să le rotiți (secțiunea 3).
+2. Deschideți **Shift Rotations** și apăsați **Add Rotation**:
+   - Dați un nume rotației (ex. `Rotatie 3 ture`).
+   - Construiți **ordinea turelor** cu **Add**, apoi aranjați cu **Up / Down**
+     și scoateți cu **Remove**. O rotație are nevoie de cel puțin două ture și nu
+     poate repeta aceeași tură.
+3. Mergeți la **Employees** și **Add Employee** / **Edit** un angajat:
+   - **Shift** = tura fixă / de rezervă a angajatului.
+   - **Rotation** = alegeți rotația creată mai sus (sau *No rotation*).
+   - **Starting shift (today)** = tura pe care angajatul o are *acum*. Trebuie să
+     facă parte din rotație.
+   Pentru a reproduce tabelul de mai sus, puneți pe A pe Schimb 1, pe B pe
+   Schimb 2 și pe C pe Schimb 3 ca ture de pornire, în aceeași săptămână.
+
+**Ce se schimbă automat:**
+
+- În fiecare **luni**, tura efectivă a angajatului avansează la tura anterioară
+  din listă (cu revenire la capăt), astfel încât toată lumea lucrează pe rând
+  fiecare tură.
+- Lista **Employees**, exportul Excel și **validarea scanărilor** folosesc tura
+  care se aplică în **săptămâna curentă** pentru angajații rotativi; sesiunile de
+  pontaj din trecut păstrează tura înregistrată la intrare.
+- Scoaterea unui angajat de pe rotație (setați **Rotation** pe *No rotation* și
+  salvați) îl readuce la **Shift**-ul fix.
+- **Activate / Deactivate** pune pe pauză întreaga rotație fără să o șteargă;
+  membrii dezactivați revin la **Shift**-ul fix. **Delete** șterge rotația, iar
+  membrii rămân cu tura lor fixă.
+
 ---
 
 ## 4. Configurarea utilizatorilor (Employees)
@@ -377,7 +466,9 @@ Apăsați **Add Employee** și completați:
 - **Employee Number** (opțional — numărul vostru extern; folosit să evitați
   duplicatele la import),
 - **Department**, **Position** (opționale),
-- **Shift** (opțional — alegeți una dintre turele create).
+- **Shift** (opțional — alegeți una dintre turele create),
+- **Rotation** și **Starting shift (today)** (opțional — vezi secțiunea 3.1
+  pentru a pune angajatul pe un program rotativ săptămânal).
 
 Aplicația atribuie automat **Employee ID** intern (`EMP000001`, `EMP000002`, …).
 **Acest ID este conținutul codului de bare.**

@@ -4,7 +4,7 @@ from PySide6.QtCore import QTimer, Qt, QDate, QTime, QThread, Signal, QSize, QUr
 from PySide6.QtGui import QAction, QDesktopServices, QIcon
 from PySide6.QtWidgets import *
 from PySide6.QtWidgets import QStyle
-from app.services import EmployeeService, ShiftService, AdminDataService
+from app.services import EmployeeService, ShiftService, RotationService, AdminDataService
 from app.export import ExcelExporter, SHEET_NAMES
 from app.maintenance import backup_database, restore_database
 from app.auth import AuthService
@@ -97,7 +97,7 @@ class TablePage(QWidget):
             self.info.setText(f'Unable to load data: {error}')
 class EmployeesPage(TablePage):
     def __init__(self, db):
-        self.svc = EmployeeService(db); self.shifts = ShiftService(db)
+        self.svc = EmployeeService(db); self.shifts = ShiftService(db); self.rotations = RotationService(db)
         super().__init__('Employees', ['Employee ID', 'Name', 'Department', 'Position', 'Shift', 'Status'], self.rows)
         self.layout().insertLayout(2, buttons_row([
             ('Add Employee', self.add),
@@ -111,8 +111,9 @@ class EmployeesPage(TablePage):
 
     def rows(self, q):
         names = {x.id: x.name for x in self.shifts.list()}
+        shift_map = self.rotations.current_shift_map()
         return [(e.employee_id, f'{e.first_name} {e.last_name}', e.department, e.position,
-                 names.get(e.assigned_shift_id, ''), 'ACTIVE' if e.active else 'INACTIVE')
+                 names.get(shift_map.get(e.employee_id, e.assigned_shift_id), ''), 'ACTIVE' if e.active else 'INACTIVE')
                 for e in self.svc.list(q)]
 
     def selected(self):
@@ -128,33 +129,63 @@ class EmployeesPage(TablePage):
         if employee and employee.assigned_shift_id is not None:
             index = shift.findData(employee.assigned_shift_id)
             if index >= 0: shift.setCurrentIndex(index)
+        # -- rotation ---------------------------------------------------------
+        rotation = QComboBox(); rotation.addItem('No rotation', None)
+        rotation_shifts = {}
+        for item, shifts, _count in self.rotations.list():
+            rotation.addItem(item.name, item.id); rotation_shifts[item.id] = shifts
+        start_shift = QComboBox()
+        def fill_start(shift_id):
+            start_shift.clear()
+            rid = rotation.currentData()
+            for sh in rotation_shifts.get(rid, []):
+                start_shift.addItem(sh.name, sh.id)
+                if shift_id == sh.id: start_shift.setCurrentIndex(start_shift.count() - 1)
+            start_shift.setEnabled(rid is not None and start_shift.count() > 0)
+        def rotation_changed():
+            fill_start((employee.rotation_start_shift_id if employee else None) or (employee.assigned_shift_id if employee else None))
+        rotation.currentIndexChanged.connect(rotation_changed)
+        if employee and employee.rotation_id is not None:
+            index = rotation.findData(employee.rotation_id)
+            if index >= 0: rotation.setCurrentIndex(index)
+        fill_start((employee.rotation_start_shift_id if employee else None) or (employee.assigned_shift_id if employee else None))
         for key, control in fields.items(): form.addRow(key.replace('_', ' ').title(), control)
         form.addRow('Shift', shift)
+        form.addRow('Rotation', rotation)
+        form.addRow('Starting shift (today)', start_shift)
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject)
         form.addRow(buttons)
         localize_window(dialog)
-        return dialog, fields, shift
+        return dialog, fields, shift, rotation, start_shift
 
     @staticmethod
     def _values(fields):
         return {key: control.text().strip() or None for key, control in fields.items()}
 
     def add(self):
-        dialog, fields, shift = self.dialog()
+        dialog, fields, shift, rotation, start_shift = self.dialog()
         if dialog.exec():
+            rotation_id = rotation.currentData()
             try:
-                self.svc.create(**self._values(fields), shift_id=shift.currentData()); self.load()
+                employee_id = self.svc.create(**self._values(fields), shift_id=shift.currentData())
+                if rotation_id is not None:
+                    self.rotations.assign(employee_id, rotation_id, start_shift_id=start_shift.currentData())
+                self.load()
             except Exception as error: QMessageBox.warning(self, 'Employee', str(error))
 
     def edit(self):
         employee_id = self.selected()
         if not employee_id: return
         employee = next(x for x in self.svc.list() if x.employee_id == employee_id)
-        dialog, fields, shift = self.dialog(employee)
+        dialog, fields, shift, rotation, start_shift = self.dialog(employee)
         if dialog.exec():
+            rotation_id = rotation.currentData()
             try:
-                self.svc.update(employee_id, **self._values(fields), assigned_shift_id=shift.currentData()); self.load()
+                self.svc.update(employee_id, **self._values(fields), assigned_shift_id=shift.currentData())
+                self.rotations.assign(employee_id, rotation_id,
+                                      start_shift_id=start_shift.currentData() if rotation_id is not None else None)
+                self.load()
             except Exception as error: QMessageBox.warning(self, 'Employee', str(error))
 
     def toggle(self):
@@ -236,6 +267,97 @@ class ShiftsPage(TablePage):
         name=self.selected()
         if name:
             shift=next(x for x in self.svc.list() if x.name==name);self.svc.update(shift.id,active=not shift.active);self.load()
+class RotationsPage(TablePage):
+    """Weekly shift rotations: ordered cycle of shifts + the members on it."""
+    def __init__(self, db):
+        self.svc = RotationService(db); self.shifts = ShiftService(db)
+        super().__init__('Shift Rotations', ['Name', 'Shift order', 'Members', 'Status'], self.rows)
+        self.layout().insertLayout(2, buttons_row([
+            ('Add Rotation', self.add),
+            ('Edit Rotation', self.edit),
+            ('Activate / Deactivate', self.toggle),
+            ('Delete', self.delete, DANGER_QSS),
+        ]))
+    def rows(self, q):
+        return [(r.name, ' → '.join(sh.name for sh in shifts), members, 'ACTIVE' if r.active else 'INACTIVE')
+                for r, shifts, members in self.svc.list() if q in r.name.lower()]
+    def selected(self):
+        row = self.table.currentRow()
+        return self.table.item(row, 0).text() if row >= 0 else None
+    def _cycle_dialog(self, rotation=None, shifts=()):
+        d = QDialog(self); d.setWindowTitle('Shift Rotation'); d.resize(520, 460)
+        root = QVBoxLayout(d)
+        name = QLineEdit(rotation.name if rotation else '')
+        root.addWidget(QLabel('Name')); root.addWidget(name)
+        hint = QLabel('Weekly rotation. Every Monday each member moves to the previous shift in this list '
+                      '(the list wraps around). Starting shifts are set per employee.')
+        hint.setWordWrap(True); hint.setStyleSheet('color:#9fb3c4'); root.addWidget(hint)
+        root.addWidget(QLabel('Shift order:'))
+        list_view = QListWidget()
+        for sh in shifts:
+            item = QListWidgetItem(sh.name); item.setData(Qt.UserRole, sh.id); list_view.addItem(item)
+        root.addWidget(list_view, 1)
+        row = QHBoxLayout()
+        picker = QComboBox()
+        def refresh_picker():
+            picker.clear()
+            present = {list_view.item(i).data(Qt.UserRole) for i in range(list_view.count())}
+            for s in self.shifts.list():
+                if s.id not in present: picker.addItem(s.name, s.id)
+        def add_shift():
+            if picker.currentData() is None: return
+            item = QListWidgetItem(picker.currentText()); item.setData(Qt.UserRole, picker.currentData())
+            list_view.addItem(item); refresh_picker()
+        def move(step):
+            index = list_view.currentRow()
+            if index < 0 or index + step < 0 or index + step >= list_view.count(): return
+            item = list_view.takeItem(index); list_view.insertItem(index + step, item); list_view.setCurrentRow(index + step)
+        def remove_shift():
+            index = list_view.currentRow()
+            if index >= 0: list_view.takeItem(index); refresh_picker()
+        add_button = QPushButton('Add'); add_button.clicked.connect(add_shift)
+        up = QPushButton('Up'); up.clicked.connect(lambda: move(-1))
+        down = QPushButton('Down'); down.clicked.connect(lambda: move(1))
+        remove = QPushButton('Remove'); remove.clicked.connect(remove_shift)
+        row.addWidget(picker, 1); row.addWidget(add_button); row.addWidget(up); row.addWidget(down); row.addWidget(remove)
+        root.addLayout(row)
+        buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(d.accept); buttons.rejected.connect(d.reject)
+        root.addWidget(buttons)
+        refresh_picker()
+        localize_window(d)
+        return d, name, list_view
+    def _ids(self, list_view):
+        return [list_view.item(i).data(Qt.UserRole) for i in range(list_view.count())]
+    def add(self):
+        d, name, list_view = self._cycle_dialog()
+        if d.exec():
+            try: self.svc.create(name.text(), self._ids(list_view)); self.load()
+            except Exception as error: QMessageBox.warning(self, 'Rotation', str(error))
+    def edit(self):
+        rotation_name = self.selected()
+        if not rotation_name: return
+        rotation, shifts, _members = next(x for x in self.svc.list() if x.name == rotation_name)
+        d, name, list_view = self._cycle_dialog(rotation, shifts)
+        if d.exec():
+            try: self.svc.update(rotation.id, name=name.text(), shift_ids=self._ids(list_view)); self.load()
+            except Exception as error: QMessageBox.warning(self, 'Rotation', str(error))
+    def toggle(self):
+        rotation_name = self.selected()
+        if rotation_name:
+            rotation = next(x for x in self.svc.list() if x.name == rotation_name)[0]
+            self.svc.update(rotation.id, active=not rotation.active); self.load()
+    def delete(self):
+        rotation_name = self.selected()
+        if not rotation_name: return
+        confirmed = QMessageBox.question(self, 'Delete rotation',
+                                         f'Delete rotation "{rotation_name}"? Employees on it will keep their fixed shift.',
+                                         QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes
+        if confirmed:
+            try:
+                rotation = next(x for x in self.svc.list() if x.name == rotation_name)[0]
+                self.svc.delete(rotation.id); self.load()
+            except Exception as error: QMessageBox.warning(self, 'Rotation', str(error))
 class HardwarePage(TablePage):
     def __init__(self, db, engine, manager=None):
         self.data = AdminDataService(db); self.db = db; self.engine = engine; self.manager = manager
@@ -916,7 +1038,7 @@ class AboutPage(QWidget):
 
 ICON_MAP = {
     'Dashboard': 'SP_DesktopIcon', 'Employees': 'SP_DirHomeIcon', 'Shifts': 'SP_FileIcon',
-    'Attendance': 'SP_FileDialogContentsView', 'Live Scans': 'SP_FileDialogListView', 'Exceptions': 'SP_MessageBoxWarning',
+    'Shift Rotations': 'SP_BrowserReload', 'Attendance': 'SP_FileDialogContentsView', 'Live Scans': 'SP_FileDialogListView', 'Exceptions': 'SP_MessageBoxWarning',
     'Terminals & Scanners': 'SP_DriveHDIcon', 'Reports': 'SP_FileDialogDetailedView', 'Excel Export': 'SP_DialogSaveButton',
     'Automatic Exports': 'SP_BrowserReload', 'Settings': 'SP_FileDialogInfoView', 'System Logs': 'SP_FileDialogContentsView',
     'Backup / Restore': 'SP_DriveFDIcon', 'Synchronization': 'SP_ArrowUp', 'About & License': 'SP_MessageBoxInformation',
@@ -1031,6 +1153,7 @@ class MainWindow(QMainWindow):
             ('Dashboard', DashboardPage(db)),
             ('Employees', EmployeesPage(db)),
             ('Shifts', ShiftsPage(db)),
+            ('Shift Rotations', RotationsPage(db)),
             ('Attendance', AttendancePage(db)),
             ('Live Scans', TablePage('Live Scans', ['Timestamp', 'Employee', 'Action', 'Terminal', 'Scanner', 'Accepted', 'Reason'], scan_rows, refresh=3000)),
             ('Exceptions', TablePage('Exceptions', ['Timestamp', 'Employee', 'Problem', 'Terminal', 'Scanner', 'Details'], exception_rows)),
