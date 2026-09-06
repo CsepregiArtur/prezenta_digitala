@@ -188,7 +188,19 @@ Build on Windows after installing the requirements:
 build_exe.bat
 ```
 
-This uses PyInstaller and produces `dist/AttendanceControl.exe`. A native Windows executable must be built and tested on Windows; macOS cannot produce the final `.exe` through this batch script.
+This uses PyInstaller and produces a **single-file** `dist/AttendanceControl.exe` with
+everything needed packed into it. The script also copies the licensing and documentation
+next to the executable in the `dist` folder:
+
+- `AttendanceControl.exe` (self-contained single file)
+- `LICENSE.txt`
+- `README.md`
+- `GUIDE.md`
+
+The application stores its database, logs, backups, exports and offline queue in the
+folder where the EXE is located (see `app.config.app_dir`). A native Windows executable
+must be built and tested on Windows; macOS cannot produce the final `.exe` through this
+batch script.
 
 ## Project structure
 
