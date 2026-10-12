@@ -3,6 +3,7 @@
 Attendance Control is a local desktop application for employee time tracking. Employees scan a Code 128 barcode at a kiosk; the application records and validates clock-in/clock-out activity in a SQLite database. It is designed for Honeywell scanners configured in USB Serial / COM mode and is intended to be packaged later as a Windows `.exe`.
 
 > 📖 **Full setup & user guide (English + Română):** see [`GUIDE.md`](GUIDE.md).
+> 🖼 **Product wiki / web page with screenshots:** see [`docs/index.html`](docs/index.html).
 > Example import files: `examples/employees_import_template.xlsx` / `.csv`.
 
 **Attendance Control v1.0.0** — © 2026 **Csepregi Artur**. All rights reserved.
@@ -279,6 +280,11 @@ app/
   main.py      Application entry point
 scanner_simulator.py   Standalone Honeywell scanner simulator (virtual serial ports, batch scans)
 tests/         Automated tests
+docs/          Product wiki / web page with real screenshots
+  index.html   Static, bilingual wiki page (English default, Romanian switchable)
+  assets/      wiki.css + wiki.i18n.js / wiki.ro.js / wiki.js (styles, dictionaries, switcher)
+  screenshots/ Real UI captures, generated automatically (no real employee data)
+  tools/       capture_screenshots.py, run_demo.py — screenshot / demo helpers
 ```
 
 ## Troubleshooting

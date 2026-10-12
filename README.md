@@ -281,8 +281,8 @@ app/
 scanner_simulator.py   Standalone Honeywell scanner simulator (virtual serial ports, batch scans)
 tests/         Automated tests
 docs/          Product wiki / web page with real screenshots
-  index.html   Static wiki page (Romanian) with descriptions and screenshots
-  assets/      wiki.css — styling for the wiki page
+  index.html   Static, bilingual wiki page (English default, Romanian switchable)
+  assets/      wiki.css + wiki.i18n.js / wiki.ro.js / wiki.js (styles, dictionaries, switcher)
   screenshots/ Real UI captures, generated automatically (no real employee data)
   tools/       capture_screenshots.py, run_demo.py — screenshot / demo helpers
 ```
