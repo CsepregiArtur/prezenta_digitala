@@ -3,7 +3,10 @@
 Attendance Control is a local desktop application for employee time tracking. Employees scan a Code 128 barcode at a kiosk; the application records and validates clock-in/clock-out activity in a SQLite database. It is designed for Honeywell scanners configured in USB Serial / COM mode and is intended to be packaged later as a Windows `.exe`.
 
 > 📖 **Full setup & user guide (English + Română):** see [`GUIDE.md`](GUIDE.md).
-> 🖼 **Product wiki / web page with screenshots:** see [`docs/index.html`](docs/index.html).
+>
+> ### 📖 [Documentation for this project](https://csepregiartur.github.io/prezenta_digitala/)
+>
+> 🖼 Offline copy of the same page: [`docs/index.html`](docs/index.html) (bilingual wiki with real screenshots).
 > Example import files: `examples/employees_import_template.xlsx` / `.csv`.
 
 **Attendance Control v1.0.0** — © 2026 **Csepregi Artur**. All rights reserved.
