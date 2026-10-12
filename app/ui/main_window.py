@@ -123,7 +123,8 @@ class EmployeesPage(TablePage):
     def dialog(self, employee=None):
         dialog = QDialog(self); dialog.setWindowTitle('Employee')
         form = QFormLayout(dialog)
-        fields = {key: QLineEdit(getattr(employee, key) or '') for key in ('first_name', 'last_name', 'employee_number', 'department', 'position')}
+        fields = {key: QLineEdit((getattr(employee, key) if employee else None) or '')
+                  for key in ('first_name', 'last_name', 'employee_number', 'department', 'position')}
         shift = QComboBox(); shift.addItem('Unassigned', None)
         for s in self.shifts.list(): shift.addItem(s.name, s.id)
         if employee and employee.assigned_shift_id is not None:

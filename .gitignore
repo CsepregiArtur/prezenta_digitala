@@ -26,6 +26,14 @@ data/
 # Build output
 build/
 *.spec
+dist/
+distribution/
+*.exe
+*.zip
+
+# Local scratch / test run folders
+test/
+_fonts/
 
 # Editors / OS
 .DS_Store

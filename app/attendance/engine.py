@@ -1,10 +1,26 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from sqlalchemy import select, desc
 from app.database.models import Employee, Shift, AttendanceSession, ScanEvent, ExceptionRecord
 from app.attendance.rotation import shift_id_for
+
+def resolve_timezone(name):
+    """Resolve an IANA timezone name, falling back to UTC if it is unusable.
+
+    Windows has no system timezone database, so zoneinfo relies on the ``tzdata``
+    package there. If tzdata is missing or ``name`` is not a valid IANA key we
+    fall back to local time instead of refusing to start the application.
+    """
+    for candidate in (name, 'UTC'):
+        if not candidate:
+            continue
+        try:
+            return ZoneInfo(candidate)
+        except (ZoneInfoNotFoundError, ValueError, KeyError, TypeError, OSError):
+            continue
+    return datetime.now().astimezone().tzinfo
 
 @dataclass(frozen=True)
 class ScannerEvent: barcode: str; timestamp: datetime; terminal_id: int | None; scanner_id: str | None
@@ -12,7 +28,7 @@ class ScannerEvent: barcode: str; timestamp: datetime; terminal_id: int | None; 
 class AttendanceResult: accepted: bool; employee: Employee | None; action: str; timestamp: datetime; reason: str | None; shift: Shift | None
 
 class AttendanceEngine:
-    def __init__(self, db, timezone='Europe/Bucharest', duplicate_seconds=5): self.db=db; self.zone=ZoneInfo(timezone); self.duplicate_seconds=duplicate_seconds
+    def __init__(self, db, timezone='Europe/Bucharest', duplicate_seconds=5): self.db=db; self.zone=resolve_timezone(timezone); self.duplicate_seconds=duplicate_seconds
     def _local(self, value):
         return value.replace(tzinfo=self.zone) if value.tzinfo is None else value.astimezone(self.zone)
     def _shift_window(self, now, shift):

@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n-meta="page.title">Attendance Control — Product wiki &amp; overview</title>
+<meta name="description" data-i18n-meta="page.description" content="Attendance Control — local desktop time-tracking application with barcode scanning, kiosk mode, Excel reports, weekly shift rotation and LAN synchronization.">
+<meta name="author" content="Csepregi Artur">
+<meta name="version" content="1.0.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232374ab'/><text y='72' x='50' font-size='58' text-anchor='middle'>🕒</text></svg>">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ===================================================== SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">🕒</div>
+      <h1>Attendance Control</h1>
+      <div class="ver">v1.0.0 · © 2026 Csepregi Artur</div>
+    </div>
+
+    <div class="langbar" role="group" aria-label="Language selector">
+      <button type="button" class="lang-btn" data-lang="en">English</button>
+      <button type="button" class="lang-btn" data-lang="ro">Română</button>
+    </div>
+
+    <div class="nav-group" data-i18n="grp.presentation">Prezentare</div>
+    <a class="nav" href="#overview" data-i18n="nav.01">1. Ce este</a>
+    <a class="nav" href="#features" data-i18n="nav.02">2. Funcționalități</a>
+    <a class="nav" href="#architecture" data-i18n="nav.03">3. Arhitectură</a>
+
+    <div class="nav-group" data-i18n="grp.interface">Interfața</div>
+    <a class="nav" href="#kiosk" data-i18n="nav.04">4. Ecranul de kiosk</a>
+    <a class="nav" href="#admin" data-i18n="nav.05">5. Panoul administratorului</a>
+    <a class="nav" href="#gallery" data-i18n="nav.06">6. Galerie de ecrane</a>
+
+    <div class="nav-group" data-i18n="grp.usage">Utilizare</div>
+    <a class="nav" href="#quickstart" data-i18n="nav.07">7. Pornire rapidă</a>
+    <a class="nav" href="#shifts" data-i18n="nav.08">8. Schimburi</a>
+    <a class="nav" href="#rotation" data-i18n="nav.09">9. Rotirea schimburilor</a>
+    <a class="nav" href="#employees" data-i18n="nav.10">10. Angajați &amp; import</a>
+    <a class="nav" href="#barcodes" data-i18n="nav.11">11. Coduri de bare</a>
+    <a class="nav" href="#scanners" data-i18n="nav.12">12. Scannere &amp; terminale</a>
+    <a class="nav" href="#rules" data-i18n="nav.13">13. Reguli de validare</a>
+    <a class="nav" href="#data" data-i18n="nav.14">14. Date &amp; rapoarte</a>
+    <a class="nav" href="#deploy" data-i18n="nav.15">15. Instalare &amp; EXE</a>
+    <a class="nav" href="#troubleshooting" data-i18n="nav.16">16. Depanare</a>
+
+    <div class="nav-group" data-i18n="grp.resources">Resurse</div>
+    <a class="nav" href="#shoots" data-i18n="nav.17">17. Cum se refac capturile</a>
+    <a class="nav" href="#license" data-i18n="nav.18">18. Licență &amp; contact</a>
+  </aside>
+
+  <!-- ===================================================== CONTENT -->
+  <main class="content">
+
+    <!-- ------------------------------------------------------- HERO -->
+    <header class="hero">
+      <div class="eyebrow" data-i18n="hero.eyebrow">Wiki de produs · Română</div>
+      <h2>Attendance Control</h2>
+      <p class="lead" data-i18n-html="hero.lead">
+        O aplicație desktop <strong>locală</strong> pentru pontaj: angajații își scanează cartela
+        cu cod de bare la un kiosk, iar aplicația validează și înregistrează automat
+        intrarea și ieșirea în timpul schimbului. Fără cloud obligatoriu, fără conturi pentru angajați.
+      </p>
+
+      <div class="cta">
+        <a class="btn btn-primary" href="#quickstart" data-i18n="hero.cta.start">▶ Pornire rapidă</a>
+        <a class="btn btn-ghost" href="#gallery" data-i18n="hero.cta.gallery">🖼 Vezi ecranele</a>
+        <a class="btn btn-ghost" href="../GUIDE.md" data-i18n="hero.cta.guide">📘 Ghid complet (EN + RO)</a>
+      </div>
+
+      <div class="chips">
+        <span class="chip"><b>Python</b> 3.12+</span>
+        <span class="chip"><b>PySide6</b> (Qt 6)</span>
+        <span class="chip"><b>SQLite</b> local</span>
+        <span class="chip"><span data-lang-only="en">Code 128 · <b>Honeywell</b> USB Serial</span><span data-lang-only="ro">Cod 128 · <b>Honeywell</b> USB Serial</span></span>
+        <span class="chip"><b>17</b> <span data-i18n="hero.chip.pages">pagini admin</span></span>
+        <span class="chip"><b>42</b> <span data-i18n="hero.chip.tests">teste automate</span></span>
+        <span class="chip"><span data-i18n="hero.chip.ui">Interfață</span> <b>RO / EN</b></span>
+      </div>
+    </header>
+
+    <!-- --------------------------------------------------- 1. OVERVIEW -->
+    <section class="section" id="overview">
+      <h3><span class="num">01</span> <span data-i18n="s01.title">Ce este Attendance Control</span></h3>
+      <p class="sub" data-i18n="s01.sub">
+        Un punct de pontaj complet local, proiectat pentru a rula pe un PC de atelier sau recepție,
+        cu un scanner de coduri de bare și un ecran tactil.
+      </p>
+
+      <div class="grid cols-3">
+        <div class="card">
+          <span class="ico">🏭</span>
+          <h4 data-i18n="s01.c1.title">Gândit pentru atelier</h4>
+          <p data-i18n="s01.c1.body">Rulează offline, pornește direct în kiosk și nu cere angajaților niciun cont sau PIN.
+             Tot ce trebuie este cartela tipărită.</p>
+        </div>
+        <div class="card">
+          <span class="ico">🔒</span>
+          <h4 data-i18n="s01.c2.title">Datele rămân la tine</h4>
+          <p data-i18n-html="s01.c2.body">Toate înregistrările ajung într-un singur fișier SQLite local
+             (<code>attendance.db</code>). Sincronizarea cu un server LAN este opțională.</p>
+        </div>
+        <div class="card">
+          <span class="ico">📊</span>
+          <h4 data-i18n="s01.c3.title">Gata de raportare</h4>
+          <p data-i18n="s01.c3.body">Rapoarte cu totaluri, export Excel pe 5 foi, exporturi programate automat,
+             copii de siguranță și jurnal de audit.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s01.tip.title">Pentru cine este</span>
+        <p data-i18n="s01.tip.body">Producție în ture, depozite, recepții și orice loc unde oamenii trebuie să
+           „bifeze” intrarea și ieșirea fără să atingă un calculator.</p>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------- 2. FEATURES -->
+    <section class="section" id="features">
+      <h3><span class="num">02</span> <span data-i18n="s02.title">Funcționalități</span></h3>
+      <p class="sub" data-i18n="s02.sub">Tot ce include versiunea 1.0.0, grupat pe zone de utilizare.</p>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <h4 data-i18n="s02.c1.title">👥 Angajați</h4>
+          <ul class="ticks">
+            <li data-i18n-html="s02.c1.l1">Creare individuală cu ID secvențial (<code>EMP000001</code>, …)</li>
+            <li data-i18n-html="s02.c1.l2">Import în bloc din <strong>Excel / CSV</strong>, cu șablon inclus</li>
+            <li data-i18n="s02.c1.l3">Număr de angajat propriu, departament, funcție</li>
+            <li data-i18n="s02.c1.l4">Activare / dezactivare fără ștergerea istoricului</li>
+            <li data-i18n="s02.c1.l5">Generare cod de bare Code 128 (PNG, doar ID-ul)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 data-i18n="s02.c2.title">⏱ Schimburi &amp; validare</h4>
+          <ul class="ticks">
+            <li data-i18n="s02.c2.l1">Schimburi de zi, de noapte (peste miezul nopții) și administrative</li>
+            <li data-i18n-html="s02.c2.l2">Minute de <strong>intrare devreme</strong> și <strong>ieșire minimă</strong> configurabile</li>
+            <li data-i18n-html="s02.c2.l3">Decizie automată <strong>IN / OUT</strong> după sesiunea deschisă</li>
+            <li data-i18n="s02.c2.l4">Blocare a scanărilor duplicate (implicit 5 secunde)</li>
+            <li data-i18n-html="s02.c2.l5"><strong>Rotire săptămânală</strong> a schimburilor, avans la fiecare luni</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 data-i18n="s02.c3.title">🔌 Hardware</h4>
+          <ul class="ticks">
+            <li data-i18n-html="s02.c3.l1">Scannere Honeywell în mod <strong>USB Serial / COM</strong></li>
+            <li data-i18n="s02.c3.l2">Mai multe scannere pe același terminal</li>
+            <li data-i18n="s02.c3.l3">Reconectare automată la fiecare 5 secunde</li>
+            <li data-i18n-html="s02.c3.l4">Buton <strong>Test Port</strong> și status live per scanner</li>
+            <li data-i18n="s02.c3.l5">Simulator software de scanner (fără hardware)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 data-i18n="s02.c4.title">📈 Activitate &amp; export</h4>
+          <ul class="ticks">
+            <li data-i18n="s02.c4.l1">Tablou de bord cu carduri live</li>
+            <li data-i18n="s02.c4.l2">Scanări live, pontaje, excepții</li>
+            <li data-i18n="s02.c4.l3">Rapoarte cu totaluri și defalcare pe schimburi</li>
+            <li data-i18n="s02.c4.l4">Export Excel cu selecție de foi și interval</li>
+            <li data-i18n="s02.c4.l5">Exporturi programate: zilnic / săptămânal / lunar</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 data-i18n="s02.c5.title">🛡 Administrare</h4>
+          <ul class="ticks">
+            <li data-i18n-html="s02.c5.l1">Autentificare administrator cu <strong>PBKDF2-SHA256</strong></li>
+            <li data-i18n="s02.c5.l2">Creare administrator la prima rulare</li>
+            <li data-i18n="s02.c5.l3">Copii de siguranță cu marcă de timp și restaurare</li>
+            <li data-i18n="s02.c5.l4">Jurnal de sistem citibil</li>
+            <li data-i18n="s02.c5.l5">Meniu Session: delogare, blocare, mod kiosk</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4 data-i18n="s02.c6.title">🌐 Rețea &amp; limbă</h4>
+          <ul class="ticks">
+            <li data-i18n="s02.c6.l1">Coadă offline durabilă pentru scanări eșuate</li>
+            <li data-i18n="s02.c6.l2">Sincronizare opțională către un server LAN</li>
+            <li data-i18n="s02.c6.l3">Mai multe kiosk-uri pe o bază de date centrală</li>
+            <li data-i18n-html="s02.c6.l4">Interfață comutabilă <strong>Engleză / Română</strong></li>
+            <li data-i18n-html="s02.c6.l5">Fus orar configurabil (implicit <code>Europe/Bucharest</code>)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------- 3. ARCHITECTURE -->
+    <section class="section" id="architecture">
+      <h3><span class="num">03</span> <span data-i18n="s03.title">Arhitectură</span></h3>
+      <p class="sub" data-i18n="s03.sub">
+        Un singur motor de pontaj, o singură bază de date. Interfața apelează serviciile existente,
+        nu duplică logica de validare.
+      </p>
+
+      <h5 data-i18n="s03.flow">Fluxul unei scanări</h5>
+      <div class="flow">
+        <span class="node start" data-i18n="s03.node.badge">Cartelă</span>
+        <span class="arrow">→</span>
+        <span class="node" data-i18n="s03.node.scanner">Scanner COM</span>
+        <span class="arrow">→</span>
+        <span class="node">ScannerManager</span>
+        <span class="arrow">→</span>
+        <span class="node decision">AttendanceEngine</span>
+        <span class="arrow">→</span>
+        <span class="node">SQLite</span>
+        <span class="arrow">→</span>
+        <span class="node">Kiosk</span>
+      </div>
+
+      <pre><code>app/
+  attendance/   Motor de pontaj, reguli IN/OUT, rotire
+  auth/         Autentificare administrator (PBKDF2)
+  barcode/      Generator Code 128
+  database/     Modele SQLAlchemy + SQLite
+  export/       Export Excel (5 foi)
+  scanner/      Manager conexiuni seriale
+  scheduler/    Programator exporturi
+  sync.py       Coadă offline + sincronizare LAN
+  ui/           Kiosk, dialog login, shell admin (17 pagini)
+  main.py       Punct de intrare
+scanner_simulator.py   Simulator Honeywell (porturi seriale virtuale)</code></pre>
+
+      <h5 data-i18n="s03.components">Componente principale</h5>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th data-i18n="s03.th.component">Componentă</th><th data-i18n="s03.th.role">Rol</th><th data-i18n="s03.th.file">Fișier</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-i18n="s03.r1.c">Bază de date</td><td data-i18n="s03.r1.r">Modele ORM și migrări idempotente</td><td><code>app/database/database.py</code></td></tr>
+            <tr><td data-i18n="s03.r2.c">Angajați</td><td data-i18n="s03.r2.r">CRUD, ID secvențial, import</td><td><code>app.services.EmployeeService</code></td></tr>
+            <tr><td data-i18n="s03.r3.c">Schimburi</td><td data-i18n="s03.r3.r">Ore, minute, activare</td><td><code>app.services.ShiftService</code></td></tr>
+            <tr><td data-i18n="s03.r4.c">Rotiri</td><td data-i18n="s03.r4.r">Ciclu săptămânal de schimburi</td><td><code>app.services.RotationService</code></td></tr>
+            <tr><td data-i18n="s03.r5.c">Reguli de rotire</td><td data-i18n="s03.r5.r">Deterministic, avans lunea</td><td><code>app.attendance.rotation</code></td></tr>
+            <tr><td data-i18n="s03.r6.c">Validare pontaj</td><td data-i18n="s03.r6.r">IN/OUT, duplicate, prea devreme</td><td><code>app.attendance.AttendanceEngine</code></td></tr>
+            <tr><td data-i18n="s03.r7.c">Cod de bare</td><td data-i18n="s03.r7.r">Generare PNG Code 128</td><td><code>app.barcode.generate_barcode</code></td></tr>
+            <tr><td data-i18n="s03.r8.c">Hardware</td><td data-i18n="s03.r8.r">Thread-uri COM + reconectare</td><td><code>app.scanner.ScannerManager</code></td></tr>
+            <tr><td data-i18n="s03.r9.c">Excel</td><td data-i18n="s03.r9.r">Export pe 5 foi</td><td><code>app.export.ExcelExporter</code></td></tr>
+            <tr><td data-i18n="s03.r10.c">Autentificare</td><td data-i18n="s03.r10.r">Hash parole + audit</td><td><code>app.auth.AuthService</code></td></tr>
+            <tr><td data-i18n="s03.r11.c">Mentenanță</td><td data-i18n="s03.r11.r">Backup / restaurare</td><td><code>app.maintenance</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------- 4. KIOSK -->
+    <section class="section" id="kiosk">
+      <h3><span class="num">04</span> <span data-i18n="s04.title">Ecranul de kiosk</span></h3>
+      <p class="sub" data-i18n-html="s04.sub">
+        Aplicația pornește <strong>direct în kiosk</strong>, pe tot ecranul. Angajații nu se autentifică
+        niciodată — văd doar rezultatul scanării.
+      </p>
+
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/01-kiosk.png"
+             data-i18n-alt="s04.fig1.alt"
+             alt="Kiosk screen: large clock, READY TO SCAN message and the ADMINISTRATOR LOGIN button at the bottom"></div>
+        <figcaption data-i18n-html="s04.fig1.cap">
+          Kioskul afișează ceasul mare, data, starea sistemului și mesajul
+          <em>SCANATI CARTELA</em>. Singurul control este butonul
+          <strong>ADMINISTRATOR LOGIN</strong> din colțul din dreapta jos.
+        </figcaption>
+      </figure>
+
+      <h5 data-i18n="s04.howto">Ce se întâmplă la o scanare</h5>
+      <ol class="steps">
+        <li data-i18n-html="s04.step1"><strong>Angajatul trece cartela</strong> peste scanner. Nu este nevoie să atingă ecranul.</li>
+        <li data-i18n-html="s04.step2"><strong>Kioskul afișează rezultatul</strong> aproximativ 2,5 secunde:
+            <span class="badge b-ok">✓ CLOCK IN</span>
+            <span class="badge b-ok">✓ CLOCK OUT</span>
+            sau un motiv de respingere.</li>
+        <li data-i18n-html="s04.step3"><strong>Revine automat la starea READY</strong> pentru următorul angajat.</li>
+      </ol>
+
+      <div class="callout warn">
+        <span class="t" data-i18n="s04.warn.title">Fără acces la date din kiosk</span>
+        <p data-i18n="s04.warn.body">Ecranul de kiosk nu expune pontaje, rapoarte, configurare sau administrarea bazei de date.
+           Pentru orice operațiune de administrare este necesară autentificarea.</p>
+      </div>
+
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/02-login.png"
+             data-i18n-alt="s04.fig2.alt"
+             alt="Administrator login dialog with Username and Password fields"></div>
+        <figcaption data-i18n-html="s04.fig2.cap">
+          Dialogul de autentificare deschis din butonul <strong>ADMINISTRATOR LOGIN</strong>.
+          La prima rulare, același dialog cere crearea primului administrator.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ------------------------------------------------------- 5. ADMIN -->
+    <section class="section" id="admin">
+      <h3><span class="num">05</span> <span data-i18n="s05.title">Panoul administratorului</span></h3>
+      <p class="sub" data-i18n="s05.sub">
+        După autentificare se deschide shell-ul de administrare: o bară de navigare în stânga,
+        17 pagini, bară de instrumente Session și bara de stare cu versiunea.
+      </p>
+
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/03-dashboard.png"
+             data-i18n-alt="s05.fig.alt"
+             alt="Dashboard with cards: Total employees, Active employees, Present now, Missing clock-out, Scans today, Accepted scans, Exceptions today, Terminals"></div>
+        <figcaption data-i18n-html="s05.fig.cap">
+          <strong>Tabloul de bord</strong> — carduri live actualizate automat, plus lista ultimelor scanări.
+          „Prezenți acum” și „Ieșiri neînregistrate” sunt calculate separat, ca să nu se dubleze valorile.
+        </figcaption>
+      </figure>
+
+      <h5 data-i18n="s05.pages">Cele 17 pagini</h5>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th data-i18n="s05.th.page">Pagină</th><th data-i18n="s05.th.role">Rol</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Dashboard</td><td data-i18n="s05.p1">Carduri live și ultimele scanări</td></tr>
+            <tr><td>2</td><td>Employees</td><td data-i18n="s05.p2">Angajați, import, cod de bare</td></tr>
+            <tr><td>3</td><td>Shifts</td><td data-i18n="s05.p3">Schimburi și reguli orare</td></tr>
+            <tr><td>4</td><td>Shift Rotations</td><td data-i18n="s05.p4">Cicluri săptămânale de schimburi</td></tr>
+            <tr><td>5</td><td>Attendance</td><td data-i18n="s05.p5">Sesiuni finalizate, cu filtre</td></tr>
+            <tr><td>6</td><td>Live Scans</td><td data-i18n="s05.p6">Fiecare scanare, cu scanner și motiv</td></tr>
+            <tr><td>7</td><td>Exceptions</td><td data-i18n="s05.p7">Scanări respinse, pe categorii</td></tr>
+            <tr><td>8</td><td>Terminals &amp; Scanners</td><td data-i18n="s05.p8">Port COM, baud, status live</td></tr>
+            <tr><td>9</td><td>Reports</td><td data-i18n="s05.p9">Totaluri, ore lucrate, pe schimburi</td></tr>
+            <tr><td>10</td><td>Excel Export</td><td data-i18n="s05.p10">Export .xlsx cu selecție de foi</td></tr>
+            <tr><td>11</td><td>Automatic Exports</td><td data-i18n="s05.p11">Programare zilnic/săptămânal/lunar</td></tr>
+            <tr><td>12</td><td>Settings</td><td data-i18n="s05.p12">Site, fus orar, limbă, anti-duplicat</td></tr>
+            <tr><td>13</td><td>System Logs</td><td data-i18n="s05.p13">Jurnalul aplicației</td></tr>
+            <tr><td>14</td><td>Backup / Restore</td><td data-i18n="s05.p14">Copii de siguranță și restaurare</td></tr>
+            <tr><td>15</td><td>Synchronization</td><td data-i18n="s05.p15">Coadă offline și server LAN</td></tr>
+            <tr><td>16</td><td>About &amp; License</td><td data-i18n="s05.p16">Versiune, autor, contact</td></tr>
+            <tr><td>17</td><td>Kiosk</td><td data-i18n="s05.p17">Previzualizare kiosk pe tot ecranul</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s05.session.title">Meniul Session</span>
+        <p data-i18n-html="s05.session.body"><strong>Log out → Kiosk</strong>, <strong>Lock / Return to Kiosk</strong>,
+           <strong>Enter Kiosk Mode</strong> (tot ecranul, deblocat cu parola de administrator)
+           și <strong>Exit</strong>. Închiderea ferestrei de administrare readuce kioskul.</p>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------- 6. GALLERY -->
+    <section class="section" id="gallery">
+      <h3><span class="num">06</span> <span data-i18n="s06.title">Galerie de ecrane</span></h3>
+      <p class="sub" data-i18n="s06.sub">
+        Capturi reale ale aplicației, cu date demonstrative. Fiecare imagine este generată
+        direct din interfață cu ajutorul scriptului de captură (vezi secțiunea 17).
+      </p>
+
+      <h4 data-i18n="s06.h1">Angajați și schimburi</h4>
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/04-angajati.png"
+             data-i18n-alt="s06.f1.alt"
+             alt="Employees page: Add, Import Excel/CSV, Save template, Generate barcode actions and an employee table"></div>
+        <figcaption data-i18n-html="s06.f1.cap">
+          <strong>Angajați</strong> — adăugare manuală, import în bloc Excel/CSV,
+          salvare șablon, generare cod de bare, activare/dezactivare și editare.
+          ID-ul intern (<code>EMP…</code>) este generat automat și este exact conținutul codului de bare.
+        </figcaption>
+      </figure>
+
+      <div class="shots-2">
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/05-schimburi.png"
+               data-i18n-alt="s06.f2.alt"
+               alt="Shifts page listing shifts with start and end times, early clock-in and earliest clock-out minutes"></div>
+          <figcaption data-i18n-html="s06.f2.cap"><strong>Schimburi</strong> — ore, minute de intrare devreme și ieșire minimă, stare activă.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/06-rotatii.png"
+               data-i18n-alt="s06.f3.alt"
+               alt="Shift Rotations page with the Schimb 1, Schimb 2, Schimb 3 cycle and member counts"></div>
+          <figcaption data-i18n-html="s06.f3.cap"><strong>Rotiri de schimburi</strong> — ciclu ordonat, avans automat în fiecare luni.</figcaption>
+        </figure>
+      </div>
+
+      <h4 data-i18n="s06.h2">Activitate și excepții</h4>
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/08-scanari-live.png"
+             data-i18n-alt="s06.f4.alt"
+             alt="Live Scans page showing each read with employee, action, terminal, scanner, accepted flag and reason"></div>
+        <figcaption data-i18n-html="s06.f4.cap">
+          <strong>Scanări live</strong> — fiecare tentativă, inclusiv cele respinse, cu terminalul
+          și scannerul care au citit cartela.
+        </figcaption>
+      </figure>
+
+      <div class="shots-2">
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/07-pontaj.png"
+               data-i18n-alt="s06.f5.alt"
+               alt="Attendance page with sessions filtered by range, employee, shift and status"></div>
+          <figcaption data-i18n-html="s06.f5.cap"><strong>Pontaj</strong> — sesiuni cu filtre pe interval, angajat, schimb și status.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/09-exceptii.png"
+               data-i18n-alt="s06.f6.alt"
+               alt="Exceptions page listing unknown barcode, too early clock-in, clock-out not allowed and duplicate scans"></div>
+          <figcaption data-i18n-html="s06.f6.cap"><strong>Excepții</strong> — cod necunoscut, angajat inactiv, prea devreme, duplicat.</figcaption>
+        </figure>
+      </div>
+
+      <h4 data-i18n="s06.h3">Raportare și export</h4>
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/11-raport.png"
+             data-i18n-alt="s06.f7.alt"
+             alt="Reports page with totals: sessions, distinct employees, worked hours, OK, missing clock-out and per-shift totals"></div>
+        <figcaption data-i18n-html="s06.f7.cap">
+          <strong>Rapoarte</strong> — agregări pe intervalul selectat: sesiuni, angajați distincți,
+          total și medie de ore lucrate, sesiuni OK vs. fără ieșire, plus defalcare pe schimburi.
+        </figcaption>
+      </figure>
+
+      <div class="shots-2">
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/12-export-excel.png"
+               data-i18n-alt="s06.f8.alt"
+               alt="Excel Export page with sheet selection, employee picker, date range and destination"></div>
+          <figcaption data-i18n-html="s06.f8.cap"><strong>Export Excel</strong> — selecție foi, angajați, interval și destinație.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/13-export-automat.png"
+               data-i18n-alt="s06.f9.alt"
+               alt="Automatic Exports page with scheduled jobs, frequency and next run time"></div>
+          <figcaption data-i18n-html="s06.f9.cap"><strong>Exporturi automate</strong> — programare și coloana <em>Next Run</em>.</figcaption>
+        </figure>
+      </div>
+
+      <h4 data-i18n="s06.h4">Hardware, setări și întreținere</h4>
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/10-scannere.png"
+             data-i18n-alt="s06.f10.alt"
+             alt="Terminals and Scanners page with COM port, baud rate, enabled flag and live status per scanner"></div>
+        <figcaption data-i18n-html="s06.f10.cap">
+          <strong>Terminale &amp; scannere</strong> — un terminal poate avea mai multe scannere.
+          Coloana de stare arată <span class="badge b-info">Connecting</span>
+          <span class="badge b-ok">Connected</span> <span class="badge b-danger">Offline</span>,
+          iar <strong>Test Port</strong> deschide portul pe un thread separat.
+        </figcaption>
+      </figure>
+
+      <div class="shots-2">
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/14-setari.png"
+               data-i18n-alt="s06.f11.alt"
+               alt="Settings page with site name, timezone, duplicate-scan seconds and interface language"></div>
+          <figcaption data-i18n-html="s06.f11.cap"><strong>Setări</strong> — site, fus orar, anti-duplicat, limbă (EN/RO).</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/16-backup.png"
+               data-i18n-alt="s06.f12.alt"
+               alt="Backup and Restore page with timestamped backups and restore action"></div>
+          <figcaption data-i18n-html="s06.f12.cap"><strong>Backup / Restore</strong> — copii cu marcă de timp, restaurare cu confirmare.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/17-sincronizare.png"
+               data-i18n-alt="s06.f13.alt"
+               alt="Synchronization page with server URL, token, interval and Test Connection / Synchronize Now buttons"></div>
+          <figcaption data-i18n-html="s06.f13.cap"><strong>Sincronizare</strong> — coadă offline durabilă, plus push către un server LAN.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/15-jurnal.png"
+               data-i18n-alt="s06.f14.alt"
+               alt="System Logs page with lines from the application log file"></div>
+          <figcaption data-i18n-html="s06.f14.cap"><strong>Jurnal de sistem</strong> — ultimele intrări din <code>logs/application.log</code>.</figcaption>
+        </figure>
+      </div>
+
+      <h4 data-i18n="s06.h5">Mod kiosk și cod de bare</h4>
+      <div class="shots-2">
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/19-mod-kiosk.png"
+               data-i18n-alt="s06.f15.alt"
+               alt="Full-screen kiosk mode opened from the Session menu"></div>
+          <figcaption data-i18n-html="s06.f15.cap"><strong>Mod kiosk</strong> — previzualizare pe tot ecranul din meniul Session.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/20-cod-de-bare.png"
+               data-i18n-alt="s06.f16.alt"
+               alt="Access badge with a Code 128 barcode containing EMP000001"></div>
+          <figcaption data-i18n-html="s06.f16.cap">
+            <strong>Cartelă de acces</strong> — cod Code 128 care conține <em>doar</em> ID-ul angajatului.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="callout danger">
+        <span class="t" data-i18n="s06.danger.title">Ce nu trebuie să conțină niciodată codul de bare</span>
+        <p data-i18n="s06.danger.body">Numele angajatului, departamentul, funcția sau orice parolă. Codul de bare al angajatului
+           nu este o credențială de administrator.</p>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------- 7. QUICKSTART -->
+    <section class="section" id="quickstart">
+      <h3><span class="num">07</span> <span data-i18n="s07.title">Pornire rapidă</span></h3>
+      <p class="sub" data-i18n="s07.sub">De la zero la prima scanare, în șase pași.</p>
+
+      <h5 data-i18n="s07.req">Cerințe</h5>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s07.th.req">Cerință</th><th data-i18n="s07.th.detail">Detaliu</th></tr></thead>
+          <tbody>
+            <tr><td>Python</td><td data-i18n="s07.r1">3.12 sau mai nou (pentru dezvoltare)</td></tr>
+            <tr><td>Internet</td><td data-i18n="s07.r2">O singură dată, pentru instalarea dependențelor</td></tr>
+            <tr><td data-i18n="s07.r3.c">Acces la disc</td><td data-i18n="s07.r3">Drept de scriere în folderul aplicației</td></tr>
+            <tr><td data-i18n="s07.r4.c">Scanare reală</td><td data-i18n="s07.r4">Scanner Honeywell în mod USB Serial/COM + driver + port liber</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s07.install">Instalare și rulare</h5>
+      <pre><code># Windows
+py -m pip install -r requirements.txt
+py -m app.main
+
+# macOS / Linux
+python3 -m pip install -r requirements.txt
+python3 -m app.main</code></pre>
+
+      <p data-i18n="s07.firstrun">La prima pornire se creează automat baza de date și folderele necesare.</p>
+
+      <h5 data-i18n="s07.order">Ordinea recomandată la prima utilizare</h5>
+      <ol class="steps">
+        <li data-i18n-html="s07.step1"><strong>Creează administratorul.</strong> Pornește aplicația și apasă
+            <strong>ADMINISTRATOR LOGIN</strong>; dialogul cere un utilizator și o parolă
+            (minimum 8 caractere).</li>
+        <li data-i18n-html="s07.step2"><strong>Configurează schimburile</strong> în pagina <em>Shifts</em>.</li>
+        <li data-i18n-html="s07.step3"><strong>Adaugă angajații</strong> manual sau importă lista din Excel/CSV.</li>
+        <li data-i18n-html="s07.step4"><strong>Generează codurile de bare</strong> și tipărește cartelele.</li>
+        <li data-i18n-html="s07.step5"><strong>Configurează scannerele</strong> în <em>Terminals &amp; Scanners</em>.</li>
+        <li data-i18n-html="s07.step6"><strong>Testează</strong> cu <em>Test Scanner Input</em> sau cu simulatorul, apoi scanează real.</li>
+      </ol>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s07.tip.title">Fără hardware? Folosește simulatorul</span>
+        <p data-i18n-html="s07.tip.body"><code>scanner_simulator.py</code> creează unul sau mai multe porturi seriale virtuale și trimite
+           coduri de bare exact ca un scanner real. Fiecare scanare trece prin același pipeline,
+           deci kioskul și <em>Live Scans</em> reacționează identic.</p>
+      </div>
+
+      <pre><code>python3 scanner_simulator.py</code></pre>
+    </section>
+
+    <!-- ------------------------------------------------------ 8. SHIFTS -->
+    <section class="section" id="shifts">
+      <h3><span class="num">08</span> <span data-i18n="s08.title">Schimburi</span></h3>
+      <p class="sub" data-i18n-html="s08.sub">
+        Un schimb definește fereastra în care o scanare este acceptată. Fără un schimb activ,
+        scanările sunt respinse cu <span class="badge b-danger">INVALID_SHIFT</span>.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s08.th.field">Câmp</th><th data-i18n="s08.th.meaning">Semnificație</th></tr></thead>
+          <tbody>
+            <tr><td data-i18n-html="s08.r1.f"><strong>Nume</strong></td><td data-i18n-html="s08.r1.m">Etichetă scurtă, unică (ex. <code>Schimb 1</code>, <code>A</code>)</td></tr>
+            <tr><td data-i18n-html="s08.r2.f"><strong>Start</strong></td><td data-i18n="s08.r2.m">Ora de început (HH:MM)</td></tr>
+            <tr><td data-i18n-html="s08.r3.f"><strong>End</strong></td><td data-i18n-html="s08.r3.m">Ora de sfârșit. Dacă end ≤ start, schimbul este tratat ca <strong>de noapte</strong></td></tr>
+            <tr><td data-i18n-html="s08.r4.f"><strong>Early clock-in (min)</strong></td><td data-i18n-html="s08.r4.m">Câte minute <em>înainte de start</em> se poate intra. Implicit 60</td></tr>
+            <tr><td data-i18n-html="s08.r5.f"><strong>Earliest clock-out (min)</strong></td><td data-i18n-html="s08.r5.m">Câte minute <em>înainte de sfârșit</em> se poate ieși. Implicit 10</td></tr>
+            <tr><td data-i18n-html="s08.r6.f"><strong>Active</strong></td><td data-i18n="s08.r6.m">Doar schimburile active sunt folosite la validare</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s08.example">Exemplu: schimb 07:00 – 15:00</h5>
+      <div class="grid cols-3">
+        <div class="stat">
+          <div class="val">06:00</div>
+          <div class="lbl" data-i18n-html="s08.stat1">Cea mai devreme intrare = 07:00 − 60 min. Înainte de 06:00 →
+            <span class="badge b-danger">CLOCK_IN_TOO_EARLY</span></div>
+        </div>
+        <div class="stat">
+          <div class="val">14:50</div>
+          <div class="lbl" data-i18n-html="s08.stat2">Cea mai devreme ieșire = 15:00 − 10 min. Înainte de 14:50 →
+            <span class="badge b-danger">CLOCK_OUT_NOT_ALLOWED</span></div>
+        </div>
+        <div class="stat">
+          <div class="val">22:00→06:00</div>
+          <div class="lbl" data-i18n="s08.stat3">Schimb de noapte: intrare la 21:30 și ieșire la 06:03 a doua zi sunt acceptate</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="t" data-i18n="s08.warn.title">Nu există „prea târziu” la intrare</span>
+        <p data-i18n="s08.warn.body">Un angajat se poate ponta la 13:40 dacă nu are sesiune deschisă — este tratat ca
+           începutul (întârziat) al turei. Doar ieșirea prea devreme și intrarea prea devreme
+           sunt respinse.</p>
+      </div>
+
+      <div class="callout ok">
+        <span class="t" data-i18n="s08.ok.title">Ora reală a scanării este mereu păstrată</span>
+        <p data-i18n="s08.ok.body">Timestampul scanării nu este niciodată înlocuit cu ora planificată a schimbului.
+           O scanare respinsă nu modifică nicio sesiune, dar rămâne în scanări brute și în excepții.</p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- 9. ROTATION -->
+    <section class="section" id="rotation">
+      <h3><span class="num">09</span> <span data-i18n="s09.title">Rotirea săptămânală a schimburilor</span></h3>
+      <p class="sub" data-i18n-html="s09.sub">
+        Schimburile pot roti între echipe <strong>în fiecare luni</strong>. O rotire este un ciclu ordonat
+        de schimburi; fiecare membru avansează o poziție în ciclu în fiecare săptămână.
+      </p>
+
+      <h5 data-i18n="s09.cycle">Cum arată ciclul</h5>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s09.th.week">Săptămână</th><th data-i18n="s09.th.a">Angajat A</th><th data-i18n="s09.th.b">Angajat B</th><th data-i18n="s09.th.c">Angajat C</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><span class="badge b-info" data-i18n="s09.shift1">Schimb 1</span></td><td><span class="badge b-info" data-i18n="s09.shift2">Schimb 2</span></td><td><span class="badge b-info" data-i18n="s09.shift3">Schimb 3</span></td></tr>
+            <tr><td>2</td><td><span class="badge b-info" data-i18n="s09.shift3">Schimb 3</span></td><td><span class="badge b-info" data-i18n="s09.shift1">Schimb 1</span></td><td><span class="badge b-info" data-i18n="s09.shift2">Schimb 2</span></td></tr>
+            <tr><td>3</td><td><span class="badge b-info" data-i18n="s09.shift2">Schimb 2</span></td><td><span class="badge b-info" data-i18n="s09.shift3">Schimb 3</span></td><td><span class="badge b-info" data-i18n="s09.shift1">Schimb 1</span></td></tr>
+            <tr><td>4</td><td><span class="badge b-info" data-i18n="s09.shift1">Schimb 1</span></td><td><span class="badge b-info" data-i18n="s09.shift2">Schimb 2</span></td><td><span class="badge b-info" data-i18n="s09.shift3">Schimb 3</span> <span data-i18n="s09.repeats">(se repetă)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s09.setup">Configurare</h5>
+      <ol class="steps">
+        <li data-i18n-html="s09.step1"><strong>Creează schimburile</strong> care participă la rotire (secțiunea 8).</li>
+        <li data-i18n-html="s09.step2"><strong>Adaugă rotirea</strong> în pagina <em>Shift Rotations</em>: denumește-o și
+            construiește ordinea cu <em>Add</em>, <em>Up / Down</em> și <em>Remove</em>.
+            Sunt necesare minimum două schimburi, fără repetări.</li>
+        <li data-i18n-html="s09.step3"><strong>Atribuie membrii</strong> din pagina <em>Employees</em>: alege
+            <em>Rotation</em>, apoi <em>Starting shift (today)</em> — schimbul pe care angajatul
+            este <em>chiar acum</em>, care trebuie să facă parte din rotire.</li>
+      </ol>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s09.tip.title">Ce se actualizează automat</span>
+        <ul class="plain">
+          <li data-i18n-html="s09.tip.l1">Lista angajaților, exportul Excel și <strong>validarea scanărilor</strong> folosesc
+              schimbul care se aplică <strong>săptămânii curente</strong>.</li>
+          <li data-i18n="s09.tip.l2">Sesiunile din trecut păstrează schimbul înregistrat la momentul pontării.</li>
+          <li data-i18n-html="s09.tip.l3"><em>No rotation</em> readuce angajatul la schimbul fix.</li>
+          <li data-i18n-html="s09.tip.l4"><em>Activate / Deactivate</em> suspendă toată rotirea; membrii revin la schimbul fix.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------- 10. EMPLOYEES -->
+    <section class="section" id="employees">
+      <h3><span class="num">10</span> <span data-i18n="s10.title">Angajați &amp; import din Excel/CSV</span></h3>
+      <p class="sub" data-i18n-html="s10.sub">
+        Angajații se pot adăuga unul câte unul sau importa în bloc dintr-un fișier
+        Excel (<code>.xlsx</code>) sau CSV.
+      </p>
+
+      <h5 data-i18n="s10.cols">Coloanele acceptate la import</h5>
+      <p data-i18n="s10.flex">Numele coloanelor sunt flexibile (ignoră majusculele și spațiile):</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s10.th.col">Coloană</th><th data-i18n="s10.th.req">Obligatoriu</th><th data-i18n="s10.th.meaning">Semnificație</th></tr></thead>
+          <tbody>
+            <tr><td><code>first_name</code></td><td><span class="badge b-danger" data-i18n="s10.yes">da</span></td><td data-i18n="s10.r1">Prenume</td></tr>
+            <tr><td><code>last_name</code></td><td><span class="badge b-danger" data-i18n="s10.yes">da</span></td><td data-i18n="s10.r2">Nume</td></tr>
+            <tr><td><code>employee_number</code></td><td><span class="badge b-muted" data-i18n="s10.no">nu</span></td><td data-i18n="s10.r3">Numărul tău extern; rândurile cu număr existent sunt sărite ca duplicate</td></tr>
+            <tr><td><code>department</code></td><td><span class="badge b-muted" data-i18n="s10.no">nu</span></td><td data-i18n="s10.r4">Departament</td></tr>
+            <tr><td><code>position</code></td><td><span class="badge b-muted" data-i18n="s10.no">nu</span></td><td data-i18n="s10.r5">Funcție / post</td></tr>
+            <tr><td><code>shift</code></td><td><span class="badge b-muted" data-i18n="s10.no">nu</span></td><td data-i18n-html="s10.r6"><strong>Numele</strong> schimbului; trebuie să existe deja</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="t" data-i18n="s10.warn.title">Importul nu creează schimburi</span>
+        <p data-i18n-html="s10.warn.body">Creează schimburile <em>înainte</em> de import, ca valorile din coloana
+           <code>shift</code> să se poată potrivi. Dacă un nume nu există, angajatul este creat
+           oricum, dar fără schimb, iar aplicația raportează motivul în sumar.</p>
+      </div>
+
+      <p data-i18n="s10.templates">Șabloane gata de folosit se află în proiect:</p>
+      <pre><code>examples/employees_import_template.xlsx
+examples/employees_import_template.csv</code></pre>
+      <p data-i18n-html="s10.save">sau apasă <strong>Save Import Template</strong> în pagina <em>Employees</em> pentru o copie proprie.</p>
+    </section>
+
+    <!-- --------------------------------------------------- 11. BARCODES -->
+    <section class="section" id="barcodes">
+      <h3><span class="num">11</span> <span data-i18n="s11.title">Coduri de bare</span></h3>
+      <p class="sub" data-i18n-html="s11.sub">
+        Fiecare angajat primește o cartelă cu un cod de bare <strong>Code 128</strong> care conține
+        exclusiv ID-ul intern.
+      </p>
+
+      <div class="shots-2">
+        <figure class="shot">
+          <div class="frame"><img src="screenshots/20-cod-de-bare.png"
+               data-i18n-alt="s11.fig.alt"
+               alt="Access badge with a Code 128 barcode, payload EMP000001"></div>
+          <figcaption data-i18n-html="s11.fig.cap">Cartelă generată din pagina <em>Employees</em> → <strong>Generate Barcode</strong>.</figcaption>
+        </figure>
+        <div>
+          <h5 data-i18n="s11.rules">Reguli</h5>
+          <ul class="ticks">
+            <li data-i18n-html="s11.l1">Payload: doar ID-ul, ex. <code>EMP000421</code></li>
+            <li data-i18n-html="s11.l2">Fișier: <code>barcodes/EMP000421.png</code></li>
+            <li data-i18n="s11.l3">Format: Code 128, lizibil de scannere Honeywell</li>
+            <li data-i18n="s11.l4">Tipărește, apoi dă fiecare angajat cartela lui</li>
+          </ul>
+
+          <div class="callout danger">
+            <span class="t" data-i18n="s11.danger.title">Confidențialitate</span>
+            <p data-i18n-html="s11.danger.body">Codul de bare nu trebuie să conțină niciodată numele, departamentul, funcția
+               sau parole. Codul de bare al angajatului <strong>nu</strong> este o credențială
+               de administrator.</p>
+          </div>
+        </div>
+      </div>
+
+      <h5>Generare din cod</h5>
+      <pre><code>from app.barcode import generate_barcode
+
+cale = generate_barcode("EMP000421")   # -> barcodes/EMP000421.png</code></pre>
+
+      <div class="callout warn">
+        <span class="t">Dependență necesară</span>
+        <p>Generarea codurilor de bare are nevoie de <code>python-barcode[pillow]</code>.
+           Dacă Pillow lipsește sau este instalat incomplet, butonul va raporta o eroare.</p>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------- 12. SCANNERS -->
+    <section class="section" id="scanners">
+      <h3><span class="num">12</span> <span data-i18n="s12.title">Scannere &amp; terminale</span></h3>
+      <p class="sub" data-i18n="s12.sub">
+        Managerul de scannere deschide fiecare dispozitiv COM activat separat, citește linia
+        codului de bare, identifică scannerul de origine și trimite evenimentul către motorul de pontaj.
+        Nu depinde de focusul tastaturii.
+      </p>
+
+      <h5 data-i18n="s12.levels">Structura pe două niveluri</h5>
+      <div class="grid cols-2">
+        <div class="card">
+          <h4 data-i18n="s12.term.title">Terminale</h4>
+          <p data-i18n-html="s12.term.body">Un terminal este o <em>locație fizică</em>: „Recepție”, „Poarta 1”, „Atelier”.
+             Adaugă unul pentru fiecare loc în care se scanează.</p>
+        </div>
+        <div class="card">
+          <h4 data-i18n="s12.scan.title">Scannere</h4>
+          <p data-i18n-html="s12.scan.body">Fiecare scanner este un dispozitiv în mod <strong>USB Serial / COM</strong>.
+             Un terminal poate avea <em>mai multe</em> scannere (o ușă de intrare și una de ieșire,
+             sau două uși pe același terminal).</p>
+        </div>
+      </div>
+
+      <h5 data-i18n="s12.fields">Câmpurile unui scanner</h5>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s12.th.field">Câmp</th><th data-i18n="s12.th.meaning">Semnificație</th></tr></thead>
+          <tbody>
+            <tr><td>Scanner ID</td><td data-i18n-html="s12.r1">Nume unic, ex. <code>SCAN1</code> — apare în <em>Live Scans</em></td></tr>
+            <tr><td>Terminal</td><td data-i18n="s12.r2">Terminalul din care face parte</td></tr>
+            <tr><td>COM port</td><td data-i18n-html="s12.r3">ex. <code>COM3</code> pe Windows, <code>/dev/tty.usbserial-…</code> pe macOS</td></tr>
+            <tr><td>Baud rate</td><td data-i18n="s12.r4">Implicit 9600 — trebuie să corespundă dispozitivului</td></tr>
+            <tr><td>Enabled</td><td data-i18n="s12.r5">Da = aplicația menține un thread de ascultare pe acest port</td></tr>
+            <tr><td>Description</td><td data-i18n="s12.r6">Text liber</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s12.diag">Status și diagnostice</h5>
+      <ul class="plain">
+        <li data-i18n-html="s12.d1"><strong>Coloana de status</strong> — <span class="badge b-info">Connecting</span>
+            → <span class="badge b-ok">Connected</span> / <span class="badge b-danger">Offline</span>.
+            La deconectare, aplicația scrie în jurnal și reîncearcă la fiecare 5 secunde, fără repornire.</li>
+        <li data-i18n-html="s12.d2"><strong>Test Port</strong> — deschide portul COM al scannerului selectat pe un thread separat
+            și raportează succesul sau eroarea (selectează un rând de <em>scanner</em>, nu de terminal).</li>
+        <li data-i18n-html="s12.d3"><strong>Test Scanner Input</strong> — simulează o scanare direct prin motorul de pontaj;
+            alege un angajat real ca să vezi o intrare acceptată.</li>
+      </ul>
+
+      <h5 data-i18n="s12.sim">Simulatorul de scanner</h5>
+      <pre><code>python3 scanner_simulator.py</code></pre>
+      <ol class="steps">
+        <li data-i18n-html="s12.s1">Se creează automat un prim <strong>port de scanner</strong>; apasă
+            <strong>+ Add scanner port</strong> pentru fiecare scanner suplimentar. Fiecare rând
+            afișează o cale de dispozitiv (ex. <code>/dev/ttys005</code>).</li>
+        <li data-i18n-html="s12.s2">În aplicație, adaugă câte un scanner în <em>Terminals &amp; Scanners</em> pentru fiecare
+            cale, cu <em>Enabled = Yes</em>. Folosește <strong>același terminal</strong> pentru mai
+            multe căi, ca să simulezi mai multe scannere pe un terminal.</li>
+        <li data-i18n-html="s12.s3">Trimite scanări: <strong>Scan now / Enter</strong>, listă în bloc cu
+            <strong>Send list</strong>, <strong>Repeat selected N times</strong> sau
+            <strong>Spread across scanners</strong> pentru rotire pe toate porturile.</li>
+      </ol>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s12.win.title">Pe Windows</span>
+        <p data-i18n-html="s12.win.body">Folosește un driver de tip <em>com0com</em> și introdu COM-ul emitent pentru fiecare port
+           adăugat (ex. <code>CNCA</code>). Simulatorul nu atinge niciodată baza de date de pontaj.</p>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------ 13. RULES -->
+    <section class="section" id="rules">
+      <h3><span class="num">13</span> <span data-i18n="s13.title">Reguli de validare</span></h3>
+      <p class="sub" data-i18n="s13.sub">
+        Motorul de pontaj decide pentru fiecare scanare dacă este acceptată, ce acțiune reprezintă
+        și — dacă este respinsă — de ce.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s13.th.situation">Situație</th><th data-i18n="s13.th.result">Rezultat</th><th data-i18n="s13.th.code">Cod</th></tr></thead>
+          <tbody>
+            <tr>
+              <td data-i18n="s13.r1.s">Codul de bare nu corespunde niciunui angajat</td>
+              <td data-i18n="s13.r1.r">Respins, înregistrat ca excepție</td>
+              <td><span class="badge b-danger">UNKNOWN_BARCODE</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r2.s">Angajat dezactivat</td>
+              <td data-i18n="s13.rejected">Respins</td>
+              <td><span class="badge b-danger">INACTIVE_EMPLOYEE</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r3.s">Fără schimb activ sau fără schimb atribuit</td>
+              <td data-i18n="s13.rejected">Respins</td>
+              <td><span class="badge b-danger">INVALID_SHIFT</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r4.s">Același angajat scanează în fereastra de duplicat (~5 s)</td>
+              <td data-i18n="s13.rejected">Respins</td>
+              <td><span class="badge b-danger">DUPLICATE_SCAN</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r5.s">Intrare mai devreme de start − minutele de intrare devreme</td>
+              <td data-i18n="s13.rejected">Respins</td>
+              <td><span class="badge b-danger">CLOCK_IN_TOO_EARLY</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r6.s">Ieșire mai devreme de sfârșit − minutele de ieșire minimă</td>
+              <td data-i18n="s13.rejected">Respins</td>
+              <td><span class="badge b-danger">CLOCK_OUT_NOT_ALLOWED</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r7.s">Altfel, fără sesiune deschisă</td>
+              <td data-i18n="s13.accepted">Acceptat</td>
+              <td><span class="badge b-ok">CLOCK IN</span></td>
+            </tr>
+            <tr>
+              <td data-i18n="s13.r8.s">Altfel, cu sesiune deschisă</td>
+              <td data-i18n="s13.accepted">Acceptat</td>
+              <td><span class="badge b-ok">CLOCK OUT</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s13.dup">Duplicatul de scanare</h5>
+      <p data-i18n-html="s13.dup.body">
+        O a doua scanare a aceluiași angajat în intervalul de duplicat (implicit
+        <strong>5 secunde</strong>, configurabil în <code>config.json</code>) este respinsă.
+        Aceasta previne scanarea accidentală de două ori a aceleiași cartele.
+      </p>
+
+      <div class="callout ok">
+        <span class="t" data-i18n="s13.ok.title">Toate încercările sunt păstrate</span>
+        <p data-i18n-html="s13.ok.body">Aplicația reține <em>fiecare</em> scanare, inclusiv cele respinse: cod necunoscut,
+           angajat inactiv, prea devreme și duplicate. Vezi pagina <em>Exceptions</em>
+           pentru lista completă a respingerilor.</p>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------- 14. DATA -->
+    <section class="section" id="data">
+      <h3><span class="num">14</span> <span data-i18n="s14.title">Date, rapoarte și copii de siguranță</span></h3>
+      <p class="sub" data-i18n="s14.sub">
+        Toate datele normale rămân pe calculatorul local. Aplicația nu are nevoie de servicii
+        cloud sau de conexiune la internet în exploatare.
+      </p>
+
+      <h5 data-i18n="s14.where">Unde stau datele</h5>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s14.th.location">Locație</th><th data-i18n="s14.th.purpose">Scop</th><th data-i18n="s14.th.access">Acces necesar</th></tr></thead>
+          <tbody>
+            <tr><td><code>attendance.db</code></td><td data-i18n="s14.r1">Baza de date principală SQLite</td><td data-i18n="s14.rw">Citire/scriere</td></tr>
+            <tr><td><code>config.json</code></td><td data-i18n="s14.r2">Setări care nu țin de pontaj</td><td data-i18n="s14.rw">Citire/scriere</td></tr>
+            <tr><td><code>barcodes/</code></td><td data-i18n="s14.r3">Imaginile PNG ale codurilor de bare</td><td data-i18n="s14.rw">Citire/scriere</td></tr>
+            <tr><td><code>exports/</code></td><td data-i18n="s14.r4">Fișierele Excel generate</td><td data-i18n="s14.rw">Citire/scriere</td></tr>
+            <tr><td><code>backup/</code></td><td data-i18n="s14.r5">Copiile de siguranță cu marcă de timp</td><td data-i18n="s14.rw">Citire/scriere</td></tr>
+            <tr><td><code>logs/application.log</code></td><td data-i18n="s14.r6">Jurnal operațional și de erori</td><td data-i18n="s14.rw">Citire/scriere</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s14.config">Configurare</h5>
+      <p data-i18n-html="s14.config.body"><code>config.json</code> conține doar setări, nu înregistrări de pontaj:</p>
+      <pre><code>{
+  "site_name": "Company",
+  "timezone": "Europe/Bucharest",
+  "duplicate_scan_seconds": 5,
+  "ui_theme": "dark",
+  "default_export_directory": "exports"
+}</code></pre>
+      <p data-i18n-html="s14.config.note">Datele de pontaj sunt în <code>attendance.db</code>, nu în JSON.</p>
+
+      <h5 data-i18n="s14.excel">Exportul Excel</h5>
+      <p data-i18n-html="s14.excel.body">
+        Exporturile sunt registre <code>.xlsx</code> reale, denumite
+        <code>Attendance_YYYY-MM-DD.xlsx</code>, cu cinci foi:
+      </p>
+      <ol class="steps">
+        <li data-i18n-html="s14.e1"><strong>Attendance Summary</strong> — sinteza prezenței</li>
+        <li data-i18n-html="s14.e2"><strong>Raw Scans</strong> — toate scanările brute</li>
+        <li data-i18n-html="s14.e3"><strong>Exceptions</strong> — respingerile</li>
+        <li data-i18n-html="s14.e4"><strong>Employees</strong> — lista angajaților</li>
+        <li data-i18n="s14.e5">Foile selectate suplimentar în dialogul de export</li>
+      </ol>
+
+      <h5 data-i18n="s14.backups">Copii de siguranță</h5>
+      <p data-i18n-html="s14.backups.body">Copiile au nume de forma <code>backup/attendance_YYYYMMDD_HHMMSS.db</code>.
+         Restaurarea creează mai întâi o copie de siguranță a bazei curente, apoi o înlocuiește
+         pe cea activă. <strong>Repornește aplicația</strong> după restaurare.</p>
+
+      <div class="callout danger">
+        <span class="t" data-i18n="s14.danger.title">Nu șterge attendance.db dacă ai nevoie de istoric</span>
+        <p data-i18n="s14.danger.body">Fă întâi o copie de siguranță. Copiile, jurnalele, exporturile și baza de date pot
+           conține informații personale de pontaj — restricționează accesul la foldere folosind
+           permisiunile normale de utilizator.</p>
+      </div>
+
+      <h5 data-i18n="s14.sched">Exporturi programate și sincronizare</h5>
+      <ul class="plain">
+        <li data-i18n-html="s14.s1"><strong>Automatic Exports</strong> — adaugă o sarcină cu oră, folder destinație și
+            frecvență (zilnic / săptămânal pe zi / lunar pe zi). Coloana <em>Next Run</em> arată
+            când va rula.</li>
+        <li data-i18n-html="s14.s2"><strong>Synchronization</strong> — evenimentele care nu pot fi salvate sunt păstrate
+            într-o coadă locală durabilă și reluate automat. Opțional, o adresă de server face ca
+            fiecare scanare nouă să fie trimisă către o bază centrală, astfel încât mai multe
+            kiosk-uri să împartă aceleași date.</li>
+      </ul>
+    </section>
+
+    <!-- ----------------------------------------------------- 15. DEPLOY -->
+    <section class="section" id="deploy">
+      <h3><span class="num">15</span> <span data-i18n="s15.title">Instalare &amp; construirea EXE</span></h3>
+      <p class="sub" data-i18n-html="s15.sub">
+        Pentru utilizare normală este suficient <code>python -m app.main</code>. Pentru distribuire există un
+        build care produce un singur executabil Windows.
+      </p>
+
+      <h5 data-i18n="s15.simple">Build simplu</h5>
+      <pre><code>build_exe.bat</code></pre>
+      <p data-i18n-html="s15.simple.body">
+        Folosește PyInstaller și produce un <strong>singur fișier</strong>
+        <code>dist/AttendanceControl.exe</code>, cu tot ce este necesar inclus. Copiază în
+        <code>dist/</code> și documentația: <code>LICENSE.txt</code>, <code>README.md</code>,
+        <code>GUIDE.md</code>.
+      </p>
+
+      <h5 data-i18n="s15.prod">Build de producție (versionat + semnat)</h5>
+      <pre><code>python build_app.py                  # full build: PyInstaller + version + sign + package
+python build_app.py --sign-existing  # sign/package the already-built EXE (fast)
+python build_app.py --no-sign        # skip signing (macOS/Linux)
+python build_app.py --onedir         # folder build instead of a single file</code></pre>
+
+      <h5 data-i18n="s15.outputs">Rezultate</h5>
+      <div class="grid cols-3">
+        <div class="card">
+          <h4>dist/</h4>
+          <p data-i18n-html="s15.o1"><code>AttendanceControl.exe</code> semnat, cu metadate Company / Product / FileVersion,
+             plus documentația alături.</p>
+        </div>
+        <div class="card">
+          <h4>distribution/</h4>
+          <p data-i18n-html="s15.o2"><code>AttendanceControl_v1.0.0/</code> și arhiva <code>.zip</code> — pachetul gata de livrare.</p>
+        </div>
+        <div class="card">
+          <h4>dist/certificates/</h4>
+          <p data-i18n="s15.o3">Certificatul de semnare și un instrument de încredere „într-un click”.</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="t" data-i18n="s15.cert.title">Certificat auto-semnat</span>
+        <p data-i18n-html="s15.cert.body">Certificatul este auto-semnat (creat o singură dată pe PC-ul de build), deci este gratuit.
+           Alte PC-uri Windows nu îl au în lista de încredere și pot afișa
+           <em>„Unknown publisher”</em> — asta înseamnă doar că <em>editorul nu este încă de încredere</em>,
+           nu că fișierul este nesigur. Pentru încredere completă, rulează o dată pe fiecare PC,
+           ca Administrator:</p>
+        <pre><code>powershell -ExecutionPolicy Bypass -File certificates\trust_certificate.ps1</code></pre>
+        <p data-i18n-html="s15.cert.domain">Pe domeniu, distribuie același <code>.cer</code> prin Group Policy
+           (<em>Trusted Root Certification Authorities</em>).</p>
+      </div>
+
+      <div class="callout danger">
+        <span class="t" data-i18n="s15.win.title">EXE-ul se construiește doar pe Windows</span>
+        <p data-i18n-html="s15.win.body">Un executabil Windows nativ trebuie construit și testat pe Windows; macOS nu poate produce
+           <code>.exe</code> prin acest script. Aplicația își stochează baza de date, jurnalele,
+           copiile de siguranță, exporturile și coada offline în folderul din care rulează EXE-ul.</p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------- 16. TROUBLESHOOT -->
+    <section class="section" id="troubleshooting">
+      <h3><span class="num">16</span> <span data-i18n="s16.title">Depanare</span></h3>
+      <p class="sub" data-i18n="s16.sub">Cele mai frecvente situații și rezolvarea lor.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s16.th.problem">Problemă</th><th data-i18n="s16.th.fix">Rezolvare</th></tr></thead>
+          <tbody>
+            <tr><td><code>ModuleNotFoundError: PySide6</code></td>
+                <td data-i18n-html="s16.r1">Rulează <code>python3 -m pip install -r requirements.txt</code> din folderul proiectului.</td></tr>
+            <tr><td data-i18n-html="s16.r2.p">Kioskul afișează <span class="badge b-danger">UNKNOWN_BARCODE</span></td>
+                <td data-i18n="s16.r2.f">ID-ul scanat nu este un angajat (sau angajatul a fost șters). Creează angajatul /
+                    tipărește codul de bare corect.</td></tr>
+            <tr><td data-i18n-html="s16.r3.p">Scanare respinsă <span class="badge b-danger">DUPLICATE_SCAN</span></td>
+                <td data-i18n="s16.r3.f">Același angajat a scanat de două ori în ~5 s — așteaptă și scanează din nou.</td></tr>
+            <tr><td data-i18n-html="s16.r4.p">Scanare respinsă <span class="badge b-danger">CLOCK_IN_TOO_EARLY</span></td>
+                <td data-i18n="s16.r4.f">Prea devreme: cea mai devreme intrare = startul schimbului − minutele de intrare devreme.</td></tr>
+            <tr><td data-i18n-html="s16.r5.p">Scanare respinsă <span class="badge b-danger">CLOCK_OUT_NOT_ALLOWED</span></td>
+                <td data-i18n="s16.r5.f">Prea devreme pentru ieșire: cea mai devreme ieșire = sfârșitul schimbului − minutele de ieșire minimă.</td></tr>
+            <tr><td data-i18n-html="s16.r6.p">Scannerul apare <span class="badge b-danger">Offline</span></td>
+                <td data-i18n="s16.r6.f">Verifică calea COM, baud rate-ul, driverul și că niciun alt program nu a deschis portul.
+                    Aplicația reîncearcă la fiecare 5 s.</td></tr>
+            <tr><td>„Select a row first”</td>
+                <td data-i18n="s16.r7.f">Apasă mai întâi pe un rând din tabel, apoi pe buton.</td></tr>
+            <tr><td data-i18n-html="s16.r8.p">Generarea codului de bare eșuează</td>
+                <td data-i18n-html="s16.r8.f">Verifică instalarea <code>python-barcode[pillow]</code>; un Pillow incomplet
+                    face <code>ImageWriter</code> indisponibil.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------ 17. SHOOTS -->
+    <section class="section" id="shoots">
+      <h3><span class="num">17</span> <span data-i18n="s17.title">Cum se refac capturile de ecran</span></h3>
+      <p class="sub" data-i18n="s17.sub">
+        Toate imaginile din această pagină sunt generate automat dintr-o bază de date demonstrativă,
+        printr-un script inclus în proiect. Nu conțin date reale de angajați.
+      </p>
+
+      <h5 data-i18n="s17.tools">Instrumente incluse</h5>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="s17.th.file">Fișier</th><th data-i18n="s17.th.role">Rol</th></tr></thead>
+          <tbody>
+            <tr><td><code>docs/tools/capture_screenshots.py</code></td>
+                <td data-i18n-html="s17.t1">Creează o bază demo, pornește interfața reală și scrie toate PNG-urile în <code>docs/screenshots/</code></td></tr>
+            <tr><td><code>docs/tools/run_demo.py</code></td>
+                <td data-i18n-html="s17.t2">Pornește aplicația completă pe o bază demo izolată (<code>.demo/</code>), fără să atingă datele reale</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 data-i18n="s17.regen">Regenerarea imaginilor</h5>
+      <pre><code># all captures (Windows, real desktop session)
+.venv\Scripts\python.exe docs\tools\capture_screenshots.py
+
+# only specific images
+.venv\Scripts\python.exe docs\tools\capture_screenshots.py --only 03-dashboard --only 11-raport
+
+# start the demo app for manual exploration
+.venv\Scripts\python.exe docs\tools\run_demo.py --fresh</code></pre>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s17.safety.title">Siguranța datelor</span>
+        <p data-i18n-html="s17.safety.body">Ambele scripturi lucrează exclusiv pe o bază de date temporară
+           (<code>docs/.capture/</code> respectiv <code>.demo/</code>). Fișierul de producție
+           <code>attendance.db</code>, jurnalele și exporturile reale nu sunt atinse niciodată.</p>
+      </div>
+
+      <h5 data-i18n="s17.view">Vizualizarea paginii</h5>
+      <p data-i18n-html="s17.view.body">
+        Pagina este HTML + CSS static, fără dependențe externe. Deschide
+        <code>docs/index.html</code> în orice browser, sau pornește un server local:
+      </p>
+      <pre><code>python -m http.server 8000 --directory docs
+# then open http://localhost:8000/</code></pre>
+    </section>
+
+    <!-- ----------------------------------------------------- 18. LICENSE -->
+    <section class="section" id="license">
+      <h3><span class="num">18</span> <span data-i18n="s18.title">Licență &amp; contact</span></h3>
+      <p class="sub" data-i18n="s18.sub">Informații legale și de contact pentru Attendance Control.</p>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <h4 data-i18n="s18.lic.title">Licență</h4>
+          <p data-i18n-html="s18.lic.head">
+            <strong>Attendance Control</strong><br>
+            Copyright © 2026 <strong>Csepregi Artur</strong>. Toate drepturile rezervate.
+          </p>
+          <p data-i18n-html="s18.lic.body">
+            Acest software și întregul său cod sursă sunt proprietare și sunt licențiate
+            exclusiv către <strong>Csepregi Artur</strong>. Copierea, distribuirea, revânzarea sau
+            modificarea neautorizată a acestui software, în întregime sau parțial, sunt interzise
+            fără permisiunea scrisă prealabilă a proprietarului.
+          </p>
+        </div>
+        <div class="card">
+          <h4 data-i18n="s18.meta.title">Contact &amp; versiune</h4>
+          <ul class="plain">
+            <li data-i18n-html="s18.m1"><strong>Versiune:</strong> 1.0.0</li>
+            <li data-i18n-html="s18.m2"><strong>Autor:</strong> Csepregi Artur</li>
+            <li data-i18n-html="s18.m3"><strong>Contact:</strong> <a href="https://csepregiartur.github.io">csepregiartur.github.io</a></li>
+            <li data-i18n-html="s18.m4"><strong>Teste automate:</strong> 42 trecute</li>
+            <li data-i18n-html="s18.m5"><strong>Documentație completă:</strong> <a href="../GUIDE.md">GUIDE.md</a> (EN + RO)</li>
+            <li data-i18n-html="s18.m6"><strong>Stare implementare:</strong> <a href="../IMPLEMENTATION.md">IMPLEMENTATION.md</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <span class="t" data-i18n="s18.third.title">Componente terțe</span>
+        <p data-i18n-html="s18.third.body">Aplicația nu conține componente open-source care necesită atribuire dincolo de
+           bibliotecile declarate în <code>requirements.txt</code>, care rămân sub licențele lor
+           respective: PySide6, SQLAlchemy, openpyxl, python-barcode, Pillow, pyserial, tzdata.</p>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------ FOOTER -->
+    <footer class="footer">
+      <p>
+        <strong>Attendance Control v1.0.0</strong> · © 2026 Csepregi Artur · <span data-i18n="footer.rights">Toate drepturile rezervate</span> ·
+        <a href="https://csepregiartur.github.io">csepregiartur.github.io</a>
+      </p>
+      <p data-i18n-html="footer.note">
+        Pagină de wiki generată static, cu capturi de ecran reale ale aplicației.
+        Fișiere sursă: <code>docs/index.html</code>, <code>docs/assets/wiki.css</code>,
+        <code>docs/screenshots/</code>.
+      </p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="assets/wiki.i18n.js"></script>
+<script src="assets/wiki.ro.js"></script>
+<script src="assets/wiki.js"></script>
+
+</body>
+</html>

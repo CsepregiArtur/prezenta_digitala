@@ -8,7 +8,7 @@ from app.barcode import generate_barcode
 class EmployeeService:
     def __init__(self, db): self.db=db
     def create(self, first_name, last_name, employee_number=None, department=None, position=None, shift_id=None):
-        if not first_name.strip() or not last_name.strip(): raise ValueError('First and last name are required')
+        if not (first_name or '').strip() or not (last_name or '').strip(): raise ValueError('First and last name are required')
         with self.db.session() as s:
             eid=self.db.next_employee_id(s); s.add(Employee(employee_id=eid,employee_number=employee_number,first_name=first_name.strip(),last_name=last_name.strip(),department=department,position=position,assigned_shift_id=shift_id)); s.commit()
         return eid

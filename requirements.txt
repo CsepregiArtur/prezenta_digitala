@@ -1,9 +1,9 @@
-PySide6>=6.8
-tzdata>=2024.1
+PySide6>=6.6
 SQLAlchemy>=2.0
 openpyxl>=3.1
-python-barcode>=0.15
-Pillow>=10.0
+python-barcode[pillow]>=0.15
 pyserial>=3.5
-PyInstaller>=6.0
-pytest>=8.0
+# Windows has no system IANA timezone database, so zoneinfo needs the tzdata package.
+tzdata>=2024.1; platform_system == "Windows"
+# Only needed to build the Windows executable (build_app.py / build_exe.bat).
+pyinstaller>=6.0
